@@ -9,6 +9,9 @@ def test_baseline_config_loads() -> None:
     assert REQUIRED_SECTIONS <= config.keys()
     assert config["random_seed"] == 42
     assert config["date_range"]["start"] <= config["date_range"]["end"]
+    assert config["universe"]["min_history_days"] > 0
+    assert config["universe"]["min_price"] >= 0
+    assert config["universe"]["min_average_dollar_volume"] >= 0
 
 
 def test_config_can_load_from_explicit_path() -> None:

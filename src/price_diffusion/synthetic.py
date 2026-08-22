@@ -15,6 +15,16 @@ class SyntheticResearchData:
     peer_membership: pd.DataFrame
 
 
+@dataclass(frozen=True)
+class SyntheticUniverseData:
+    """Inputs and thresholds covering the main Stage 4 eligibility cases."""
+
+    security_master: pd.DataFrame
+    daily_panel: pd.DataFrame
+    semiconductor_classification: pd.DataFrame
+    universe_parameters: dict[str, object]
+
+
 def make_synthetic_research_data() -> SyntheticResearchData:
     """Create semiconductor-like observations with point-in-time peer edges."""
     security_master = pd.DataFrame(
@@ -27,6 +37,7 @@ def make_synthetic_research_data() -> SyntheticResearchData:
                 "Integrated Circuits Synthetic",
             ],
             "exchange": ["NASDAQ", "NASDAQ", "NASDAQ"],
+            "security_type": ["common_stock"] * 3,
             "sector": ["Information Technology"] * 3,
             "sub_industry": ["Semiconductors"] * 3,
         }
@@ -35,7 +46,12 @@ def make_synthetic_research_data() -> SyntheticResearchData:
     dates = pd.to_datetime(["2024-01-02", "2024-01-03", "2024-01-04"])
     universe_membership = pd.DataFrame(
         [
-            {"date": date, "security_id": security_id, "eligible": True}
+            {
+                "date": date,
+                "security_id": security_id,
+                "eligible": True,
+                "exclusion_reason": None,
+            }
             for date in dates
             for security_id in security_master["security_id"]
         ]
@@ -91,6 +107,116 @@ def make_synthetic_research_data() -> SyntheticResearchData:
         universe_membership=universe_membership,
         daily_panel=daily_panel,
         peer_membership=peer_membership,
+    )
+
+
+def make_synthetic_universe_data() -> SyntheticUniverseData:
+    """Create valid, non-semiconductor, new-listing, and illiquid cases."""
+    security_master = pd.DataFrame(
+        {
+            "security_id": [
+                "SEC_VALID",
+                "SEC_ADR",
+                "SEC_RETAIL",
+                "SEC_NEW",
+                "SEC_ILLIQUID",
+            ],
+            "ticker": ["VALID", "SADR", "SHOP", "NEW", "ILLIQ"],
+            "company_name": [
+                "Valid Fabless Synthetic",
+                "Valid Foundry ADR Synthetic",
+                "Non Semiconductor Retail Synthetic",
+                "Newly Listed Semiconductor Synthetic",
+                "Illiquid Semiconductor Synthetic",
+            ],
+            "exchange": ["NASDAQ", "NYSE", "NYSE", "NASDAQ", "NASDAQ"],
+            "security_type": [
+                "common_stock",
+                "adr",
+                "common_stock",
+                "common_stock",
+                "common_stock",
+            ],
+            "sector": [
+                "Information Technology",
+                "Information Technology",
+                "Consumer Discretionary",
+                "Information Technology",
+                "Information Technology",
+            ],
+            "sub_industry": [
+                "Semiconductors",
+                "Semiconductors",
+                "Specialty Retail",
+                "Semiconductors",
+                "Semiconductors",
+            ],
+        }
+    )
+    semiconductor_classification = pd.DataFrame(
+        {
+            "security_id": ["SEC_VALID", "SEC_ADR", "SEC_NEW", "SEC_ILLIQUID"],
+            "ticker": ["VALID", "SADR", "NEW", "ILLIQ"],
+            "company_name": [
+                "Valid Fabless Synthetic",
+                "Valid Foundry ADR Synthetic",
+                "Newly Listed Semiconductor Synthetic",
+                "Illiquid Semiconductor Synthetic",
+            ],
+            "subsector": [
+                "fabless_design",
+                "foundry",
+                "integrated_device_manufacturer",
+                "analog_mixed_signal",
+            ],
+            "classification_notes": [
+                "Synthetic manually assigned semiconductor example.",
+                "Synthetic manually assigned US-listed ADR example.",
+                "Synthetic manually assigned recent listing example.",
+                "Synthetic manually assigned low-liquidity example.",
+            ],
+        }
+    )
+
+    dates = pd.bdate_range("2024-01-02", periods=5)
+    specifications = {
+        "SEC_VALID": (dates, 20.0, 200.0),
+        "SEC_ADR": (dates, 25.0, 160.0),
+        "SEC_RETAIL": (dates, 30.0, 200.0),
+        "SEC_NEW": (dates[-2:], 15.0, 200.0),
+        "SEC_ILLIQUID": (dates, 10.0, 5.0),
+    }
+    rows: list[dict[str, object]] = []
+    for security_id, (security_dates, base_price, volume) in specifications.items():
+        prior: float | None = None
+        for position, date in enumerate(security_dates):
+            price = base_price + position
+            rows.append(
+                {
+                    "date": date,
+                    "security_id": security_id,
+                    "adjusted_close": price,
+                    "close": price,
+                    "volume": volume,
+                    "return": None if prior is None else price / prior - 1.0,
+                }
+            )
+            prior = price
+
+    return SyntheticUniverseData(
+        security_master=security_master,
+        daily_panel=pd.DataFrame(rows),
+        semiconductor_classification=semiconductor_classification,
+        universe_parameters={
+            "min_history_days": 3,
+            "min_price": 5.0,
+            "min_average_dollar_volume": 1_000.0,
+            "average_dollar_volume_window_days": 3,
+            "us_exchanges": ["NASDAQ", "NYSE"],
+            "eligible_security_types": ["common_stock", "adr"],
+            "classification_as_of_date": "2024-01-02",
+            "allow_classification_before_as_of": False,
+        },
     )
 
 

@@ -6,10 +6,10 @@ discovery propagates across economically related firms.
 
 ## Current status
 
-Stage 3 adds provider-neutral CSV ingestion and constructs a validated daily
-market panel from raw observations. It deliberately does **not** connect to
-external APIs, detect events, calculate strategies or peer diffusion metrics,
-or perform statistical analysis.
+Stage 4 adds manually reviewed semiconductor classification metadata and
+point-in-time universe construction with configurable listing, history, price,
+and liquidity rules. It deliberately does **not** construct peers, detect
+events, calculate strategies or diffusion metrics, or perform event studies.
 
 ## Design philosophy
 
@@ -37,8 +37,9 @@ logical type, nullability rule, and dataset key.
 
 | Dataset | Required fields | Primary key |
 | --- | --- | --- |
-| `security_master` | `security_id`, `ticker`, `company_name`, `exchange`, `sector`, `sub_industry` | `security_id` |
-| `universe_membership` | `date`, `security_id`, `eligible` | `date`, `security_id` |
+| `security_master` | `security_id`, `ticker`, `company_name`, `exchange`, `security_type`, `sector`, `sub_industry` | `security_id` |
+| `semiconductor_classification` | `security_id`, `ticker`, `company_name`, `subsector`, `classification_notes` | `security_id` |
+| `universe_membership` | `date`, `security_id`, `eligible`, `exclusion_reason` | `date`, `security_id` |
 | `daily_panel` | `date`, `security_id`, `adjusted_close`, `close`, `volume`, `return` | `date`, `security_id` |
 | `peer_membership` | `date`, `security_id`, `peer_id`, `weight`, `peer_definition` | `date`, `security_id`, `peer_id`, `peer_definition` |
 
@@ -52,6 +53,31 @@ Universe and panel identifiers must resolve to the security master. Peer edges
 are directed, may not point to the source security, and both endpoints must
 resolve to the master. Within each `(date, security_id, peer_definition)` group,
 non-negative weights must sum to one.
+
+### Universe construction
+
+The Stage 4 builder evaluates every security-master identifier on every market
+date, including unavailable securities, and records all failed eligibility
+rules. Thresholds and allowed exchanges and instrument types are stored under
+`universe` in `configs/baseline.yaml`. History and average dollar volume use
+only observations through the membership date.
+
+```python
+from price_diffusion.config import load_config
+from price_diffusion.universe import build_universe_membership
+
+universe_membership = build_universe_membership(
+    security_master,
+    daily_panel,
+    semiconductor_classification,
+    load_config(),
+)
+```
+
+The bundled classification is a current seed snapshot for human review. Its
+configured as-of date blocks silent historical reuse by default. A retrospective
+override must be explicit and does not make the data survivorship-free. See
+`research_notes/stage_04_universe_construction.md` for the design and limitations.
 
 ### Why point-in-time data matters
 

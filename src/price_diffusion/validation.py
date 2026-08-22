@@ -14,6 +14,7 @@ from pandas.api.types import (
 from price_diffusion.data_contracts import (
     DAILY_PANEL,
     PEER_MEMBERSHIP,
+    SEMICONDUCTOR_CLASSIFICATION,
     SECURITY_MASTER,
     UNIVERSE_MEMBERSHIP,
     ColumnContract,
@@ -180,6 +181,22 @@ def _raise_if_issues(issues: list[ValidationIssue]) -> None:
 def validate_security_master(frame: pd.DataFrame) -> None:
     """Validate security metadata and unique security identifiers."""
     _raise_if_issues(collect_contract_issues(frame, SECURITY_MASTER))
+
+
+def validate_semiconductor_classification(
+    frame: pd.DataFrame, security_master: pd.DataFrame
+) -> None:
+    """Validate manually reviewed semiconductor labels and security references."""
+    issues = collect_contract_issues(frame, SEMICONDUCTOR_CLASSIFICATION)
+    issues.extend(
+        _known_security_issues(
+            frame,
+            ("security_id",),
+            SEMICONDUCTOR_CLASSIFICATION,
+            security_master,
+        )
+    )
+    _raise_if_issues(issues)
 
 
 def validate_universe_membership(

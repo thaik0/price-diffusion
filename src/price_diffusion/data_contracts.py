@@ -50,6 +50,7 @@ SECURITY_MASTER = DataFrameContract(
         ticker=ColumnContract(ColumnKind.STRING),
         company_name=ColumnContract(ColumnKind.STRING),
         exchange=ColumnContract(ColumnKind.STRING),
+        security_type=ColumnContract(ColumnKind.STRING),
         sector=ColumnContract(ColumnKind.STRING),
         sub_industry=ColumnContract(ColumnKind.STRING),
     ),
@@ -62,8 +63,21 @@ UNIVERSE_MEMBERSHIP = DataFrameContract(
         date=ColumnContract(ColumnKind.DATE),
         security_id=ColumnContract(ColumnKind.STRING),
         eligible=ColumnContract(ColumnKind.BOOLEAN),
+        exclusion_reason=ColumnContract(ColumnKind.STRING, nullable=True),
     ),
     primary_key=("date", "security_id"),
+)
+
+SEMICONDUCTOR_CLASSIFICATION = DataFrameContract(
+    name="semiconductor_classification",
+    columns=_columns(
+        security_id=ColumnContract(ColumnKind.STRING),
+        ticker=ColumnContract(ColumnKind.STRING),
+        company_name=ColumnContract(ColumnKind.STRING),
+        subsector=ColumnContract(ColumnKind.STRING),
+        classification_notes=ColumnContract(ColumnKind.STRING),
+    ),
+    primary_key=("security_id",),
 )
 
 DAILY_PANEL = DataFrameContract(
@@ -100,6 +114,7 @@ DATA_CONTRACTS = MappingProxyType(
         contract.name: contract
         for contract in (
             SECURITY_MASTER,
+            SEMICONDUCTOR_CLASSIFICATION,
             UNIVERSE_MEMBERSHIP,
             DAILY_PANEL,
             PEER_MEMBERSHIP,

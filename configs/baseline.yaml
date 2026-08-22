@@ -1,9 +1,23 @@
 # Baseline values are placeholders, not finalized empirical design choices.
 universe:
   name: semiconductor_equities
-  symbols: []
-  exchanges: []
   currency: USD
+  # Thresholds are baseline design choices and must be sensitivity-tested.
+  min_history_days: 60
+  min_price: 5.0
+  min_average_dollar_volume: 1000000.0
+  average_dollar_volume_window_days: 20
+  us_exchanges:
+    - NASDAQ
+    - NYSE
+    - NYSE American
+  eligible_security_types:
+    - common_stock
+    - adr
+  # The bundled classifications are a current review snapshot. Historical use
+  # is fail-closed unless a researcher deliberately changes the override below.
+  classification_as_of_date: "2026-08-22"
+  allow_classification_before_as_of: false
 
 date_range:
   start: "2015-01-01"

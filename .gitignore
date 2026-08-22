@@ -6,7 +6,8 @@ __pycache__/
 build/
 dist/
 .ipynb_checkpoints/
-research_notes/
+research_notes/*
+!research_notes/stage_04_universe_construction.md
 
 # Keep directory markers, but do not version generated or downloaded data.
 data/raw/*

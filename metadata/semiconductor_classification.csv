@@ -1,0 +1,9 @@
+security_id,ticker,company_name,subsector,classification_notes
+SEC_NVDA,NVDA,NVIDIA Corporation,fabless_design,"Seed classification for human review; current-company snapshot, not a survivorship-free historical label."
+SEC_INTC,INTC,Intel Corporation,integrated_device_manufacturer,"Seed classification for human review; current-company snapshot, not a survivorship-free historical label."
+SEC_TSM,TSM,Taiwan Semiconductor Manufacturing Company Limited,foundry,"US-listed ADR; seed classification for human review; current-company snapshot."
+SEC_MU,MU,Micron Technology Inc.,memory,"Seed classification for human review; current-company snapshot, not a survivorship-free historical label."
+SEC_AMAT,AMAT,Applied Materials Inc.,equipment,"Seed classification for human review; current-company snapshot, not a survivorship-free historical label."
+SEC_SNPS,SNPS,Synopsys Inc.,eda_ip,"Seed classification for human review; current-company snapshot, not a survivorship-free historical label."
+SEC_AMKR,AMKR,Amkor Technology Inc.,packaging_testing,"Seed classification for human review; current-company snapshot, not a survivorship-free historical label."
+SEC_TXN,TXN,Texas Instruments Incorporated,analog_mixed_signal,"Seed classification for human review; current-company snapshot, not a survivorship-free historical label."
