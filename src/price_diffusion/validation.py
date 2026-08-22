@@ -13,8 +13,10 @@ from pandas.api.types import (
 
 from price_diffusion.data_contracts import (
     DAILY_PANEL,
+    EVENTS,
     PEER_CLASSIFICATION,
     PEER_MEMBERSHIP,
+    RELATIVE_RETURNS,
     SEMICONDUCTOR_CLASSIFICATION,
     SECURITY_MASTER,
     UNIVERSE_MEMBERSHIP,
@@ -357,6 +359,48 @@ def validate_peer_membership(
                     "invalid_weight_sum",
                     f"{len(invalid_sums)} peer groups have weights that do not sum to 1",
                 )
+            )
+    _raise_if_issues(issues)
+
+
+def validate_relative_returns(
+    frame: pd.DataFrame, security_master: pd.DataFrame | None = None
+) -> None:
+    """Validate the Stage 6 relative-return output contract."""
+    issues = collect_contract_issues(frame, RELATIVE_RETURNS)
+    if security_master is not None:
+        issues.extend(
+            _known_security_issues(
+                frame, ("security_id",), RELATIVE_RETURNS, security_master
+            )
+        )
+    _raise_if_issues(issues)
+
+
+def validate_events(
+    frame: pd.DataFrame, security_master: pd.DataFrame | None = None
+) -> None:
+    """Validate the Stage 7 event output and event-specific invariants."""
+    issues = collect_contract_issues(frame, EVENTS)
+    if security_master is not None:
+        issues.extend(
+            _known_security_issues(frame, ("security_id",), EVENTS, security_master)
+        )
+    if "direction" in frame:
+        invalid = ~frame["direction"].isin({"positive", "negative"})
+        if invalid.any():
+            issues.append(
+                _issue(EVENTS, "invalid_direction", "direction must be positive or negative")
+            )
+    required = {"relative_return", "relative_volatility", "threshold_used"}
+    if required <= set(frame.columns):
+        if frame["relative_volatility"].lt(0).any() or frame["threshold_used"].lt(0).any():
+            issues.append(
+                _issue(EVENTS, "negative_threshold", "volatility and thresholds must be non-negative")
+            )
+        if frame["relative_return"].abs().le(frame["threshold_used"]).any():
+            issues.append(
+                _issue(EVENTS, "non_event", "every event must strictly exceed its threshold")
             )
     _raise_if_issues(issues)
 

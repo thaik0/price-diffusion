@@ -24,9 +24,19 @@ date_range:
   end: "2025-12-31"
 
 event_thresholds:
-  return_z_score: 3.0
-  volume_z_score: 3.0
-  minimum_observations: 60
+  # Stage 7 event definition. Values are pre-analysis design choices.
+  minimum_relative_move: 0.05
+  volatility_window: 60
+  threshold_multiplier: 3.0
+  cooldown_period: 5
+  cooldown_scope: both
+  minimum_peer_count: 3
+  minimum_history_requirement: 60
+  exclude_corporate_action_types:
+    - split
+    - merger
+    - abnormal_price_adjustment
+    - unknown
 
 peer_definition:
   method: industry_group

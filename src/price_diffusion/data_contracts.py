@@ -120,6 +120,49 @@ PEER_MEMBERSHIP = DataFrameContract(
     primary_key=("date", "security_id", "peer_id", "peer_definition"),
 )
 
+RELATIVE_RETURNS = DataFrameContract(
+    name="relative_returns",
+    columns=_columns(
+        date=ColumnContract(ColumnKind.DATE),
+        security_id=ColumnContract(ColumnKind.STRING),
+        peer_definition=ColumnContract(ColumnKind.STRING),
+        stock_return=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        peer_return=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        relative_return=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        market_adjusted_return=ColumnContract(
+            ColumnKind.NUMERIC, nullable=True, finite=True
+        ),
+        semiconductor_adjusted_return=ColumnContract(
+            ColumnKind.NUMERIC, nullable=True, finite=True
+        ),
+    ),
+    primary_key=("date", "security_id", "peer_definition"),
+)
+
+EVENTS = DataFrameContract(
+    name="events",
+    columns=_columns(
+        event_id=ColumnContract(ColumnKind.STRING),
+        date=ColumnContract(ColumnKind.DATE),
+        security_id=ColumnContract(ColumnKind.STRING),
+        direction=ColumnContract(ColumnKind.STRING),
+        relative_return=ColumnContract(ColumnKind.NUMERIC, finite=True),
+        relative_volatility=ColumnContract(ColumnKind.NUMERIC, finite=True),
+        threshold_used=ColumnContract(ColumnKind.NUMERIC, finite=True),
+        peer_definition=ColumnContract(ColumnKind.STRING),
+        subsector=ColumnContract(ColumnKind.STRING),
+        volume=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        market_cap=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        simultaneous_event_group=ColumnContract(
+            ColumnKind.STRING, nullable=True
+        ),
+        corporate_action_type=ColumnContract(ColumnKind.STRING),
+        earnings_flag=ColumnContract(ColumnKind.BOOLEAN),
+        news_identified_flag=ColumnContract(ColumnKind.BOOLEAN),
+    ),
+    primary_key=("event_id",),
+)
+
 DATA_CONTRACTS = MappingProxyType(
     {
         contract.name: contract
@@ -130,6 +173,8 @@ DATA_CONTRACTS = MappingProxyType(
             UNIVERSE_MEMBERSHIP,
             DAILY_PANEL,
             PEER_MEMBERSHIP,
+            RELATIVE_RETURNS,
+            EVENTS,
         )
     }
 )

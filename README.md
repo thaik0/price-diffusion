@@ -6,11 +6,11 @@ discovery propagates across economically related firms.
 
 ## Current status
 
-Stage 5 adds approved smoke-test economic peer metadata and point-in-time directed
-peer portfolios. The baseline uses narrow economic groups; a broad eligible
-semiconductor portfolio is available for robustness. It deliberately does
-**not** detect events, calculate abnormal returns, estimate factor models,
-measure diffusion, or select peers from historical returns.
+Stage 7 adds pre-specified detection of unusually large peer-relative abnormal
+returns. Thresholds use strictly trailing volatility, with peer/history gates,
+corporate-action classification, firm and peer-group cooldowns, and flags for
+simultaneous related movers. It does **not** identify information releases, run
+event studies, calculate post-event returns, or build trading strategies.
 
 ## Design philosophy
 
@@ -44,6 +44,55 @@ logical type, nullability rule, and dataset key.
 | `universe_membership` | `date`, `security_id`, `eligible`, `exclusion_reason` | `date`, `security_id` |
 | `daily_panel` | `date`, `security_id`, `adjusted_close`, `close`, `volume`, `return` | `date`, `security_id` |
 | `peer_membership` | `date`, `security_id`, `peer_id`, `weight`, `peer_definition` | `date`, `security_id`, `peer_id`, `peer_definition` |
+| `relative_returns` | `date`, `security_id`, `peer_definition`, `stock_return`, `peer_return`, `relative_return`, `market_adjusted_return`, `semiconductor_adjusted_return` | `date`, `security_id`, `peer_definition` |
+| `events` | `event_id`, `date`, `security_id`, `direction`, `relative_return`, `relative_volatility`, `threshold_used`, `peer_definition`, `subsector`, metadata flags | `event_id` |
+
+### Event detection
+
+Stage 7 applies `abs(relative_abnormal_return) > max(minimum_relative_move,
+threshold_multiplier * trailing_volatility)`. The rolling volatility input is
+shifted before estimation, so neither the event-date shock nor future returns
+can affect its threshold. Event parameters live under `event_thresholds` in the
+baseline configuration.
+
+```python
+from price_diffusion.config import load_config
+from price_diffusion.events import detect_events
+
+events = detect_events(relative_abnormal_returns, load_config())
+```
+
+The input supplies dated `peer_count`, `peer_group`, `subsector`, and an explicit
+`corporate_action_type` classification alongside the Stage 6 relative abnormal
+return. Optional earnings and news flags are metadata only. See
+`research_notes/stage_07_event_detection.md` for the design rationale and
+limitations.
+
+### Relative-return measurement
+
+Stage 6 joins returns to peer membership by date, excludes the focal company,
+and renormalizes weights over peers with observed returns. Configurable market
+and semiconductor factor series are also joined by date; absent factor dates
+remain missing rather than becoming zero returns. The rolling factor interface
+uses observations strictly before each prediction date and retains its fitted
+coefficients and estimation boundaries.
+
+```python
+from price_diffusion.returns import build_relative_returns
+
+relative_returns = build_relative_returns(
+    daily_panel,
+    peer_membership,
+    market_returns,
+    semiconductor_factor_returns,
+    market_return_column="market_return",
+    semiconductor_return_column="semiconductor_return",
+)
+```
+
+Relative abnormal returns are exposed as a separate transformation so the
+researcher can explicitly choose which abnormal-return model is being compared.
+See `research_notes/stage_06_relative_returns.md` for assumptions and limits.
 
 Dates must be timezone-naive pandas datetimes normalized to midnight. Strings
 are not silently parsed. Identifiers and metadata strings must be populated,
