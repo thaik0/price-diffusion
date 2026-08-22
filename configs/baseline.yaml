@@ -51,6 +51,14 @@ event_study:
     post_event_days: 10
   return_specification: semiconductor_adjusted_return
 
+statistical_inference:
+  # Pre-analysis choices. Analytical p-values use cluster-robust standard errors.
+  confidence_level: 0.95
+  interval_method: analytical
+  trim_proportion: 0.10
+  bootstrap_iterations: 2000
+  cluster_by: firm
+
 peer_definition:
   method: industry_group
   minimum_peers: 3

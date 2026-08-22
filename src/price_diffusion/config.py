@@ -14,6 +14,7 @@ REQUIRED_SECTIONS = {
     "date_range",
     "event_thresholds",
     "event_study",
+    "statistical_inference",
     "peer_definition",
     "random_seed",
     "output_paths",

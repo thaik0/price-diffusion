@@ -2,6 +2,7 @@ from pathlib import Path
 
 from price_diffusion.config import REQUIRED_SECTIONS, load_config
 from price_diffusion.event_study import EventStudyConfig
+from price_diffusion.statistical_inference import InferenceConfig
 
 
 def test_baseline_config_loads() -> None:
@@ -25,6 +26,9 @@ def test_baseline_config_loads() -> None:
     assert max(study["primary_horizons"] + study["descriptive_horizons"]) <= study["event_window"]["post_event_days"]
     parameters = EventStudyConfig.from_mapping(config)
     assert parameters.horizons == (1, 3, 5, 10)
+    inference = InferenceConfig.from_mapping(config)
+    assert inference.cluster_by == "firm"
+    assert inference.confidence_level == 0.95
 
 
 def test_config_can_load_from_explicit_path() -> None:

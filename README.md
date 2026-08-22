@@ -276,6 +276,41 @@ diagnostics = result.diagnostics
 These outputs are descriptive only. Stage 8 does not perform significance
 tests or support causal claims about information diffusion.
 
+## Statistical inference
+
+Stage 9 measures uncertainty around detected-event outcomes without changing
+event definitions or simulating selection-preserving nulls. It reports complete
+distributions for convergence, peer catch-up, and initiator reversal by horizon,
+return specification, peer definition, and shock direction. Analytical
+Student-t and reproducible percentile-bootstrap confidence intervals are
+available.
+
+Convergence uses a one-sided test against a positive mean; peer catch-up and
+initiator reversal use two-sided tests against zero. The default covariance
+estimator clusters by initiating firm. Event-date and analytical two-way
+clustering are also supported. These are conditional-on-selection associations,
+not causal evidence.
+
+Conditional peer-CAR and initiator-CAR regressions use a fixed, parsimonious
+design: signed initial shock, direction, event-date volume and market
+capitalization, subsector, two volatility regimes, and a simultaneous-event
+flag. Only named contemporaneous fields enter the model.
+
+```python
+from price_diffusion.statistical_inference import InferenceConfig, run_statistical_inference
+
+inference = run_statistical_inference(
+    result.outcomes,
+    event_panel=result.event_panel,
+    event_characteristics=event_characteristics,
+    config=InferenceConfig(cluster_by="firm"),
+    output_directory="outputs/tables",
+)
+```
+
+The call writes summary, distribution, hypothesis, attrition, regression, and
+event-time CSV tables under `outputs/tables/`.
+
 ## Repository layout
 
 ```text
