@@ -47,7 +47,9 @@ def test_reviewed_peer_metadata_has_required_taxonomy() -> None:
     assert not metadata["security_id"].duplicated().any()
     assert set(metadata["subsector"]) == PRIMARY_SUBSECTORS
     assert metadata["classification_notes"].str.strip().ne("").all()
-    assert metadata["classification_notes"].str.contains("human review").all()
+    assert not metadata["classification_notes"].str.contains(
+        "human review", case=False
+    ).any()
 
 
 def test_economic_peers_are_close_groups_not_unrelated_firms(

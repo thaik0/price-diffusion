@@ -6,7 +6,7 @@ discovery propagates across economically related firms.
 
 ## Current status
 
-Stage 5 adds human-reviewable economic peer metadata and point-in-time directed
+Stage 5 adds approved smoke-test economic peer metadata and point-in-time directed
 peer portfolios. The baseline uses narrow economic groups; a broad eligible
 semiconductor portfolio is available for robustness. It deliberately does
 **not** detect events, calculate abnormal returns, estimate factor models,
