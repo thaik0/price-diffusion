@@ -6,9 +6,9 @@ discovery propagates across economically related firms.
 
 ## Current status
 
-Stage 1 establishes the project layout, Python package, baseline configuration,
-and infrastructure tests. It deliberately does **not** implement data ingestion,
-event detection, trading strategies, statistical analysis, or machine learning.
+Stage 2 defines and validates the four core research datasets. It deliberately
+does **not** download market data, connect to external APIs, detect events,
+calculate strategies, or perform statistical analysis.
 
 ## Design philosophy
 
@@ -26,6 +26,66 @@ event detection, trading strategies, statistical analysis, or machine learning.
 The values in `configs/baseline.yaml` are placeholders for the first empirical
 design. They are not validated research choices and should be revised before an
 experiment is interpreted.
+
+## Core data contracts
+
+Contracts are defined in `src/price_diffusion/data_contracts.py`; fail-closed,
+non-mutating validation is implemented in `src/price_diffusion/validation.py`.
+Extra source columns may be retained, but every required field must satisfy its
+logical type, nullability rule, and dataset key.
+
+| Dataset | Required fields | Primary key |
+| --- | --- | --- |
+| `security_master` | `security_id`, `ticker`, `company_name`, `exchange`, `sector`, `sub_industry` | `security_id` |
+| `universe_membership` | `date`, `security_id`, `eligible` | `date`, `security_id` |
+| `daily_panel` | `date`, `security_id`, `adjusted_close`, `close`, `volume`, `return` | `date`, `security_id` |
+| `peer_membership` | `date`, `security_id`, `peer_id`, `weight`, `peer_definition` | `date`, `security_id`, `peer_id`, `peer_definition` |
+
+Dates must be timezone-naive pandas datetimes normalized to midnight. Strings
+are not silently parsed. Identifiers and metadata strings must be populated,
+prices must be positive, volume must be non-negative, and numeric observations
+must be finite. `return` is the sole nullable core field because the first
+observation for a security may not have a prior price.
+
+Universe and panel identifiers must resolve to the security master. Peer edges
+are directed, may not point to the source security, and both endpoints must
+resolve to the master. Within each `(date, security_id, peer_definition)` group,
+non-negative weights must sum to one.
+
+### Why point-in-time data matters
+
+Universe eligibility and peer membership are dated facts rather than permanent
+security attributes. Replacing historical membership with today's universe or
+today's peer set would introduce survivorship and look-ahead bias: the research
+would use information that was unavailable on the date being studied. Keeping
+the date in each key forces downstream joins to state which historical snapshot
+they use and allows changes in listings, eligibility, and economic relationships
+to be represented without rewriting history.
+
+### Future market-data boundary
+
+Future source adapters will write immutable vendor responses to `data/raw/`,
+standardize identifiers, dates, corporate-action adjustments, and units in
+`data/interim/`, then construct these four frames. Before any frame is promoted
+to `data/processed/` or consumed by event and strategy code, call:
+
+```python
+from price_diffusion.validation import validate_research_data
+
+validate_research_data(
+    security_master=security_master,
+    universe_membership=universe_membership,
+    daily_panel=daily_panel,
+    peer_membership=peer_membership,
+)
+```
+
+Validation is a gate, not a repair step. An adapter must explicitly resolve a
+bad type, missing identifier, duplicate key, invalid value, or malformed peer
+group and record the transformation in provenance metadata. Deterministic
+synthetic examples are available from
+`price_diffusion.synthetic.make_synthetic_research_data` for adapter and
+pipeline tests that must not use external data.
 
 ## Setup
 
