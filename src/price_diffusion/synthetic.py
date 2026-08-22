@@ -25,6 +25,92 @@ class SyntheticUniverseData:
     universe_parameters: dict[str, object]
 
 
+@dataclass(frozen=True)
+class SyntheticPeerData:
+    """Stage 5 inputs spanning close and unrelated semiconductor groups."""
+
+    security_master: pd.DataFrame
+    semiconductor_classification: pd.DataFrame
+    universe_membership: pd.DataFrame
+    peer_classification: pd.DataFrame
+
+
+def make_synthetic_peer_data() -> SyntheticPeerData:
+    """Create AI-compute, memory, equipment, and analog peer examples."""
+    specifications = [
+        ("SEC_AI_A", "AIA", "AI Accelerator A", "fabless_design", "ai_compute"),
+        ("SEC_AI_B", "AIB", "AI Accelerator B", "fabless_design", "ai_compute"),
+        ("SEC_MEM", "MEM", "Memory Producer", "memory", "memory_products"),
+        ("SEC_EQP", "EQP", "Wafer Equipment", "equipment", "wafer_equipment"),
+        (
+            "SEC_ANA",
+            "ANA",
+            "Analog Devices",
+            "analog_mixed_signal",
+            "analog_signal_chain",
+        ),
+    ]
+    security_master = pd.DataFrame(
+        {
+            "security_id": [row[0] for row in specifications],
+            "ticker": [row[1] for row in specifications],
+            "company_name": [row[2] for row in specifications],
+            "exchange": ["NASDAQ"] * len(specifications),
+            "security_type": ["common_stock"] * len(specifications),
+            "sector": ["Information Technology"] * len(specifications),
+            "sub_industry": ["Semiconductors"] * len(specifications),
+        }
+    )
+    semiconductor_classification = pd.DataFrame(
+        {
+            "security_id": [row[0] for row in specifications],
+            "ticker": [row[1] for row in specifications],
+            "company_name": [row[2] for row in specifications],
+            "subsector": [row[3] for row in specifications],
+            "classification_notes": [
+                "Synthetic semiconductor classification for Stage 5 tests."
+            ]
+            * len(specifications),
+        }
+    )
+    peer_classification = pd.DataFrame(
+        {
+            "security_id": [row[0] for row in specifications],
+            "subsector": [row[3] for row in specifications],
+            "peer_group": [row[4] for row in specifications],
+            "classification_notes": [
+                f"Human-reviewed synthetic grouping based on {row[4].replace('_', ' ')}."
+                for row in specifications
+            ],
+        }
+    )
+    dates = pd.to_datetime(["2024-01-02", "2024-01-03"])
+    universe_membership = pd.DataFrame(
+        [
+            {
+                "date": date,
+                "security_id": security_id,
+                "eligible": not (
+                    date == dates[1] and security_id == "SEC_AI_B"
+                ),
+                "exclusion_reason": (
+                    "insufficient_liquidity"
+                    if date == dates[1] and security_id == "SEC_AI_B"
+                    else None
+                ),
+            }
+            for date in dates
+            for security_id in security_master["security_id"]
+        ]
+    ).astype({"eligible": "bool"})
+    return SyntheticPeerData(
+        security_master=security_master,
+        semiconductor_classification=semiconductor_classification,
+        universe_membership=universe_membership,
+        peer_classification=peer_classification,
+    )
+
+
 def make_synthetic_research_data() -> SyntheticResearchData:
     """Create semiconductor-like observations with point-in-time peer edges."""
     security_master = pd.DataFrame(

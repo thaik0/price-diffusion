@@ -80,6 +80,17 @@ SEMICONDUCTOR_CLASSIFICATION = DataFrameContract(
     primary_key=("security_id",),
 )
 
+PEER_CLASSIFICATION = DataFrameContract(
+    name="peer_classification",
+    columns=_columns(
+        security_id=ColumnContract(ColumnKind.STRING),
+        subsector=ColumnContract(ColumnKind.STRING),
+        peer_group=ColumnContract(ColumnKind.STRING),
+        classification_notes=ColumnContract(ColumnKind.STRING),
+    ),
+    primary_key=("security_id",),
+)
+
 DAILY_PANEL = DataFrameContract(
     name="daily_panel",
     columns=_columns(
@@ -115,6 +126,7 @@ DATA_CONTRACTS = MappingProxyType(
         for contract in (
             SECURITY_MASTER,
             SEMICONDUCTOR_CLASSIFICATION,
+            PEER_CLASSIFICATION,
             UNIVERSE_MEMBERSHIP,
             DAILY_PANEL,
             PEER_MEMBERSHIP,

@@ -6,10 +6,11 @@ discovery propagates across economically related firms.
 
 ## Current status
 
-Stage 4 adds manually reviewed semiconductor classification metadata and
-point-in-time universe construction with configurable listing, history, price,
-and liquidity rules. It deliberately does **not** construct peers, detect
-events, calculate strategies or diffusion metrics, or perform event studies.
+Stage 5 adds human-reviewable economic peer metadata and point-in-time directed
+peer portfolios. The baseline uses narrow economic groups; a broad eligible
+semiconductor portfolio is available for robustness. It deliberately does
+**not** detect events, calculate abnormal returns, estimate factor models,
+measure diffusion, or select peers from historical returns.
 
 ## Design philosophy
 
@@ -39,6 +40,7 @@ logical type, nullability rule, and dataset key.
 | --- | --- | --- |
 | `security_master` | `security_id`, `ticker`, `company_name`, `exchange`, `security_type`, `sector`, `sub_industry` | `security_id` |
 | `semiconductor_classification` | `security_id`, `ticker`, `company_name`, `subsector`, `classification_notes` | `security_id` |
+| `peer_classification` | `security_id`, `subsector`, `peer_group`, `classification_notes` | `security_id` |
 | `universe_membership` | `date`, `security_id`, `eligible`, `exclusion_reason` | `date`, `security_id` |
 | `daily_panel` | `date`, `security_id`, `adjusted_close`, `close`, `volume`, `return` | `date`, `security_id` |
 | `peer_membership` | `date`, `security_id`, `peer_id`, `weight`, `peer_definition` | `date`, `security_id`, `peer_id`, `peer_definition` |
@@ -78,6 +80,34 @@ The bundled classification is a current seed snapshot for human review. Its
 configured as-of date blocks silent historical reuse by default. A retrospective
 override must be explicit and does not make the data survivorship-free. See
 `research_notes/stage_04_universe_construction.md` for the design and limitations.
+
+### Peer construction
+
+Peer construction first restricts both relationship endpoints to securities
+eligible on the same date. `economic_subsector_peers` then matches the narrower
+reviewed `peer_group` label and equal-weights the remaining non-self peers.
+`broad_semiconductor_peers` includes every other eligible semiconductor.
+
+```python
+from price_diffusion.peers import (
+    BROAD_SEMICONDUCTOR_PEERS,
+    ECONOMIC_SUBSECTOR_PEERS,
+    build_peer_membership,
+)
+
+peer_membership = build_peer_membership(
+    security_master,
+    semiconductor_classification,
+    universe_membership,
+    peer_classification,
+    definitions=(ECONOMIC_SUBSECTOR_PEERS, BROAD_SEMICONDUCTOR_PEERS),
+)
+```
+
+The output is directed and dated, and weights sum to one within each non-empty
+source/date/definition portfolio. The architecture reserves a trailing-return
+similarity definition, but Stage 5 intentionally does not implement it. See
+`research_notes/stage_05_peer_construction.md` for rationale and limitations.
 
 ### Why point-in-time data matters
 

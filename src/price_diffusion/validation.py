@@ -13,6 +13,7 @@ from pandas.api.types import (
 
 from price_diffusion.data_contracts import (
     DAILY_PANEL,
+    PEER_CLASSIFICATION,
     PEER_MEMBERSHIP,
     SEMICONDUCTOR_CLASSIFICATION,
     SECURITY_MASTER,
@@ -199,6 +200,19 @@ def validate_semiconductor_classification(
     _raise_if_issues(issues)
 
 
+def validate_peer_classification(
+    frame: pd.DataFrame, security_master: pd.DataFrame
+) -> None:
+    """Validate human-reviewed economic peer labels and references."""
+    issues = collect_contract_issues(frame, PEER_CLASSIFICATION)
+    issues.extend(
+        _known_security_issues(
+            frame, ("security_id",), PEER_CLASSIFICATION, security_master
+        )
+    )
+    _raise_if_issues(issues)
+
+
 def validate_universe_membership(
     frame: pd.DataFrame, security_master: pd.DataFrame
 ) -> None:
@@ -269,7 +283,9 @@ def validate_daily_panel(frame: pd.DataFrame, security_master: pd.DataFrame) -> 
 
 
 def validate_peer_membership(
-    frame: pd.DataFrame, security_master: pd.DataFrame
+    frame: pd.DataFrame,
+    security_master: pd.DataFrame,
+    universe_membership: pd.DataFrame | None = None,
 ) -> None:
     """Validate directed, weighted, point-in-time peer relationships."""
     issues = collect_contract_issues(frame, PEER_MEMBERSHIP)
@@ -288,6 +304,39 @@ def validate_peer_membership(
                     f"{self_peer_count} rows use the security itself as a peer",
                 )
             )
+
+    if universe_membership is not None:
+        try:
+            validate_universe_membership(universe_membership, security_master)
+        except DataValidationError as error:
+            issues.extend(error.issues)
+        required = {"date", "security_id", "peer_id"}
+        if required <= set(frame.columns) and {
+            "date",
+            "security_id",
+            "eligible",
+        } <= set(universe_membership.columns) and is_bool_dtype(
+            universe_membership["eligible"]
+        ):
+            eligible = universe_membership.loc[
+                universe_membership["eligible"], ["date", "security_id"]
+            ]
+            eligible_keys = set(eligible.itertuples(index=False, name=None))
+            invalid_endpoints = 0
+            for row in frame[["date", "security_id", "peer_id"]].itertuples(
+                index=False
+            ):
+                invalid_endpoints += (row.date, row.security_id) not in eligible_keys
+                invalid_endpoints += (row.date, row.peer_id) not in eligible_keys
+            if invalid_endpoints:
+                issues.append(
+                    _issue(
+                        PEER_MEMBERSHIP,
+                        "ineligible_peer_endpoint",
+                        f"{invalid_endpoints} relationship endpoints are not eligible "
+                        "on the relationship date",
+                    )
+                )
 
     group_columns = ["date", "security_id", "peer_definition"]
     if set(group_columns + ["weight"]) <= set(frame.columns) and is_numeric_dtype(

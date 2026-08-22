@@ -1,0 +1,13 @@
+security_id,subsector,peer_group,classification_notes
+SEC_NVDA,fabless_design,ai_compute_accelerators,"Seed for human review: fabless compute accelerator designer; grouped by primary data-center and AI compute exposure."
+SEC_AMD,fabless_design,ai_compute_accelerators,"Seed for human review: fabless CPU/GPU and accelerator designer; economically overlaps in data-center and AI compute."
+SEC_MRVL,fabless_design,data_center_connectivity,"Seed for human review: fabless data-infrastructure and connectivity designer; separated from compute accelerators."
+SEC_QCOM,fabless_design,wireless_compute_platforms,"Seed for human review: fabless wireless and edge-compute platform designer; grouped by handset and connectivity exposure."
+SEC_AVGO,fabless_design,data_center_connectivity,"Seed for human review: semiconductor operations emphasize networking and connectivity; conglomerate characteristics require periodic review."
+SEC_INTC,integrated_device_manufacturer,logic_idm,"Seed for human review: integrated logic designer and manufacturer; fabrication ownership distinguishes it from fabless designers."
+SEC_TSM,foundry,pure_play_foundry,"Seed for human review: contract wafer foundry; grouped by manufacturing-service economics rather than chip end market."
+SEC_MU,memory,memory_products,"Seed for human review: DRAM and NAND producer; grouped by commodity memory supply-and-demand exposure."
+SEC_AMAT,equipment,wafer_fabrication_equipment,"Seed for human review: wafer-fabrication equipment supplier; economics tied to semiconductor capital spending."
+SEC_SNPS,eda_ip,eda_design_ip,"Seed for human review: electronic-design automation and semiconductor IP supplier; grouped by chip-design tooling economics."
+SEC_AMKR,packaging_testing,outsourced_assembly_test,"Seed for human review: outsourced semiconductor assembly and test provider; grouped by back-end manufacturing services."
+SEC_TXN,analog_mixed_signal,diversified_analog,"Seed for human review: diversified analog and embedded semiconductor manufacturer; grouped by broad analog signal-chain exposure."
