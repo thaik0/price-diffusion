@@ -1,0 +1,55 @@
+security_id,ticker,yahoo_symbol,company_name,exchange,currency
+SEC_000660_KS,000660.KS,000660.KS,SK hynix Inc.,Korea Exchange (KRX),KRW
+SEC_002371_SZ,002371.SZ,002371.SZ,NAURA Technology Group Co. Ltd.,Shenzhen Stock Exchange,CNY
+SEC_0981_HK,0981.HK,0981.HK,Semiconductor Manufacturing International Corporation,Hong Kong Stock Exchange,HKD
+SEC_1347_HK,1347.HK,1347.HK,Hua Hong Semiconductor Limited,Hong Kong Stock Exchange,HKD
+SEC_2454_TW,2454.TW,2454.TW,MediaTek Inc.,Taiwan Stock Exchange,TWD
+SEC_285A_T,285A.T,285A.T,Kioxia Holdings Corporation,Tokyo Stock Exchange,JPY
+SEC_3436_T,3436.T,3436.T,SUMCO Corporation,Tokyo Stock Exchange,JPY
+SEC_3443_TW,3443.TW,3443.TW,Global Unichip Corporation,Taiwan Stock Exchange,TWD
+SEC_4063_T,4063.T,4063.T,Shin-Etsu Chemical Co. Ltd.,Tokyo Stock Exchange,JPY
+SEC_603986_SS,603986.SS,603986.SS,GigaDevice Semiconductor Inc.,Shanghai Stock Exchange,CNY
+SEC_6146_T,6146.T,6146.T,DISCO Corporation,Tokyo Stock Exchange,JPY
+SEC_6723_T,6723.T,6723.T,Renesas Electronics Corporation,Tokyo Stock Exchange,JPY
+SEC_6857_T,6857.T,6857.T,Advantest Corporation,Tokyo Stock Exchange,JPY
+SEC_688012_SS,688012.SS,688012.SS,Advanced Micro-Fabrication Equipment Inc. China,Shanghai Stock Exchange STAR Market,CNY
+SEC_688256_SS,688256.SS,688256.SS,Cambricon Technologies Corporation Limited,Shanghai Stock Exchange STAR Market,CNY
+SEC_688825_SS,688825.SS,688825.SS,CXMT Corporation,Shanghai Stock Exchange STAR Market,CNY
+SEC_6963_T,6963.T,6963.T,ROHM Co. Ltd.,Tokyo Stock Exchange,JPY
+SEC_8035_T,8035.T,8035.T,Tokyo Electron Limited,Tokyo Stock Exchange,JPY
+SEC_ADI,ADI,ADI,Analog Devices Inc.,Nasdaq,USD
+SEC_AMAT,AMAT,AMAT,Applied Materials Inc.,Nasdaq,USD
+SEC_AMD,AMD,AMD,Advanced Micro Devices Inc.,Nasdaq,USD
+SEC_AMKR,AMKR,AMKR,Amkor Technology Inc.,Nasdaq,USD
+SEC_ARM,ARM,ARM,Arm Holdings plc,Nasdaq ADR,USD
+SEC_ASM,ASM,ASM.AS,ASM International N.V.,Euronext Amsterdam,EUR
+SEC_ASML,ASML,ASML,ASML Holding N.V.,Nasdaq ADR,USD
+SEC_ASX,ASX,ASX,ASE Technology Holding Co. Ltd.,NYSE ADR,USD
+SEC_CBRS,CBRS,CBRS,Cerebras Systems Inc.,Nasdaq,USD
+SEC_CDNS,CDNS,CDNS,Cadence Design Systems Inc.,Nasdaq,USD
+SEC_COHR,COHR,COHR,Coherent Corp.,NYSE,USD
+SEC_CRDO,CRDO,CRDO,Credo Technology Group Holding Ltd.,Nasdaq,USD
+SEC_ENTG,ENTG,ENTG,Entegris Inc.,Nasdaq,USD
+SEC_FORM,FORM,FORM,FormFactor Inc.,Nasdaq,USD
+SEC_GFS,GFS,GFS,GlobalFoundries Inc.,Nasdaq,USD
+SEC_IFX_DE,IFX.DE,IFX.DE,Infineon Technologies AG,Xetra,EUR
+SEC_INTC,INTC,INTC,Intel Corporation,Nasdaq,USD
+SEC_KLAC,KLAC,KLAC,KLA Corporation,Nasdaq,USD
+SEC_LRCX,LRCX,LRCX,Lam Research Corporation,Nasdaq,USD
+SEC_MCHP,MCHP,MCHP,Microchip Technology Incorporated,Nasdaq,USD
+SEC_MPWR,MPWR,MPWR,Monolithic Power Systems Inc.,Nasdaq,USD
+SEC_MRVL,MRVL,MRVL,Marvell Technology Inc.,Nasdaq,USD
+SEC_MU,MU,MU,Micron Technology Inc.,Nasdaq,USD
+SEC_NVDA,NVDA,NVDA,NVIDIA Corporation,Nasdaq,USD
+SEC_NXPI,NXPI,NXPI,NXP Semiconductors N.V.,Nasdaq,USD
+SEC_ON,ON,ON,onsemi,Nasdaq,USD
+SEC_Q,Q,Q,Qnity Electronics Inc.,NYSE,USD
+SEC_QCOM,QCOM,QCOM,QUALCOMM Incorporated,Nasdaq,USD
+SEC_SNPS,SNPS,SNPS,Synopsys Inc.,Nasdaq,USD
+SEC_SOI_PA,SOI.PA,SOI.PA,Soitec S.A.,Euronext Paris,EUR
+SEC_STM,STM,STM,STMicroelectronics N.V.,NYSE,USD
+SEC_TPRO_MI,TPRO.MI,TPRO.MI,Technoprobe S.p.A.,Euronext Milan,EUR
+SEC_TSEM,TSEM,TSEM,Tower Semiconductor Ltd.,Nasdaq,USD
+SEC_TSM,TSM,TSM,Taiwan Semiconductor Manufacturing Company Limited,NYSE ADR,USD
+SEC_TXN,TXN,TXN,Texas Instruments Incorporated,Nasdaq,USD
+SEC_UMC,UMC,UMC,United Microelectronics Corporation,NYSE ADR,USD
