@@ -285,3 +285,6 @@ def test_diagnostics_coverage_manifest_and_generation_are_deterministic(tmp_path
     )
     assert manifest_one == manifest_two
     assert manifest_one["number_of_securities"] == 54
+    assert manifest_one["universe_version"] == "semiconductor_universe_2026_08_22_v1"
+    assert manifest_one["classification_snapshot_date"] == "2026-08-22"
+    assert manifest_one["eligibility_start_date"] == "2015-01-01"

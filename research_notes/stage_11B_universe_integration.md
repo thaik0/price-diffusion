@@ -29,7 +29,7 @@ persisted. For example, the current NVIDIA line maps to `SEC_NVDA`. If its ticke
 changes later, the ticker-to-ID mapping must be updated while `SEC_NVDA` stays
 fixed. Regenerating an ID from the new ticker would break historical joins.
 
-## Point-in-time eligibility
+## Date-specific eligibility
 
 Rules are loaded from `configs/final_baseline.yaml`. The configuration records:
 
@@ -48,10 +48,12 @@ recorded as missing data rather than silently dropping the company. Failed rules
 are retained in deterministic order in `exclusion_reason`; eligibility requires
 that no rule fail.
 
-The metadata is a current review snapshot dated 2026-08-22. The baseline is
-fail-closed before that date. Setting `allow_classification_before_as_of: true`
-is an explicit retrospective research assumption, not evidence that the current
-classification was historically known.
+The metadata is a current review snapshot dated 2026-08-22. Stage 11D separates
+that classification provenance date from the operational eligibility date and
+explicitly applies the current classification historically. This is a
+retrospective research assumption, not evidence that the classification was
+known at each historical date. Every eligibility output carries a universe
+version so this assumption cannot be mistaken for another universe build.
 
 ## Why classification remains manual
 
@@ -73,8 +75,9 @@ not alter earlier membership.
 
 Survivorship bias enters earlier: today's approved company list omits firms that
 failed, were acquired, delisted, or left the ecosystem. Backfilling the current
-list cannot create a survivorship-free historical universe. The classification
-as-of guard prevents silent backfilling but does not reconstruct missing firms.
+list cannot create a survivorship-free historical universe. Explicit
+configuration and universe versioning make backfilling visible but do not
+reconstruct missing firms.
 
 Ticker symbols are vendor- and time-dependent. They can be reused, changed after
 corporate actions, or identify different listing lines across exchanges. Internal
@@ -98,8 +101,8 @@ counts.
 
 ## Current limitations
 
-- No production daily market-data panel is versioned in the repository, so the
-  checked-in manifest cannot claim empirical daily eligibility.
+- Stage 11D produces a versioned production panel and historical eligibility;
+  the current reviewed classification is still applied retrospectively.
 - The current metadata snapshot is not a dated history of classifications,
   acquisitions, delistings, domicile changes, or business-model changes.
 - The security master lacks permanent vendor identifiers such as PERMNO/FIGI and

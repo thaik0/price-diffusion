@@ -2,11 +2,15 @@
 # and separate from researcher-owned economic classifications.
 universe:
   name: semiconductor_equities
+  universe_version: semiconductor_universe_2026_08_22_v1
   currency: USD
   allowed_universe_tiers:
     - core
   minimum_price: 5.0
-  minimum_trading_history: 60
+  # Baseline factor/event work requires one full trading year of prior data.
+  minimum_trading_history: 252
+  # Short-history names remain available under the extension eligibility flag.
+  extension_minimum_trading_history: 60
   liquidity:
     minimum_average_dollar_volume: 1000000.0
     trailing_window_days: 20
@@ -42,9 +46,15 @@ universe:
     allow: true
     prefer_primary_listing: false
     require_ratio_adjusted_volume: false
-  # Current manual review snapshot. Retrospective classification is fail-closed.
-  classification_as_of_date: "2026-08-22"
-  allow_classification_before_as_of: false
+  # Classification provenance is separate from the dates on which operational
+  # eligibility is evaluated. This is an explicit retrospective application of
+  # the current reviewed snapshot, not a claim of point-in-time classification.
+  classification_snapshot_date: "2026-08-22"
+  apply_classification_historically: true
+  eligibility:
+    start_date: "2015-01-01"
+    # No eligibility end is imposed here. The study's estimation window remains
+    # separately controlled by date_range below.
   coverage_checks:
     factor_model_min_history: 252
     short_public_history_days: 252

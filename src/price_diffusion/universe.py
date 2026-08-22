@@ -184,11 +184,19 @@ class UniverseParameters:
     average_dollar_volume_window_days: int
     us_exchanges: tuple[str, ...]
     eligible_security_types: tuple[str, ...]
-    classification_as_of_date: pd.Timestamp
+    classification_snapshot_date: pd.Timestamp
     allow_classification_before_as_of: bool = False
     allowed_universe_tiers: tuple[str, ...] = ("core",)
     allowed_exchange_or_markets: tuple[str, ...] = ()
     allow_adrs: bool = True
+    universe_version: str = "legacy_unversioned"
+    eligibility_start_date: pd.Timestamp | None = None
+    eligibility_end_date: pd.Timestamp | None = None
+
+    @property
+    def classification_as_of_date(self) -> pd.Timestamp:
+        """Backward-compatible alias for the classification provenance date."""
+        return self.classification_snapshot_date
 
     @classmethod
     def from_mapping(cls, config: Mapping[str, Any]) -> "UniverseParameters":
@@ -211,12 +219,15 @@ class UniverseParameters:
         adr = section.get("adr_handling", {})
         if not isinstance(listing, Mapping) or not isinstance(adr, Mapping):
             raise ValueError("listing_restrictions and adr_handling must be mappings")
+        classification_date = section.get(
+            "classification_snapshot_date", section.get("classification_as_of_date")
+        )
         values = {
             "minimum_trading_history": history,
             "minimum_price": min_price,
             "minimum_average_dollar_volume": min_adv,
             "trailing_window_days": window,
-            "classification_as_of_date": section.get("classification_as_of_date"),
+            "classification_snapshot_date": classification_date,
         }
         missing = sorted(name for name, value in values.items() if value is None)
         if missing:
@@ -254,15 +265,40 @@ class UniverseParameters:
         allow_adrs = adr.get("allow", "adr" in security_types)
         if not isinstance(allow_adrs, bool):
             raise ValueError("adr_handling.allow must be boolean")
-        historical = section.get("allow_classification_before_as_of", False)
+        historical = section.get(
+            "apply_classification_historically",
+            section.get("allow_classification_before_as_of", False),
+        )
         if not isinstance(historical, bool):
-            raise ValueError("allow_classification_before_as_of must be boolean")
+            raise ValueError("apply_classification_historically must be boolean")
         try:
-            as_of = pd.Timestamp(values["classification_as_of_date"])
+            as_of = pd.Timestamp(values["classification_snapshot_date"])
         except (TypeError, ValueError) as error:
-            raise ValueError("classification_as_of_date must be a date") from error
+            raise ValueError("classification_snapshot_date must be a date") from error
         if as_of.tz is not None or as_of != as_of.normalize():
-            raise ValueError("classification_as_of_date must be timezone-naive and date-only")
+            raise ValueError(
+                "classification_snapshot_date must be timezone-naive and date-only"
+            )
+        eligibility = section.get("eligibility", {})
+        if not isinstance(eligibility, Mapping):
+            raise ValueError("eligibility must be a mapping")
+        eligibility_start = _optional_date(
+            eligibility.get("start_date", section.get("eligibility_start_date")),
+            "eligibility.start_date",
+        )
+        eligibility_end = _optional_date(
+            eligibility.get("end_date", section.get("eligibility_end_date")),
+            "eligibility.end_date",
+        )
+        if (
+            eligibility_start is not None
+            and eligibility_end is not None
+            and eligibility_end < eligibility_start
+        ):
+            raise ValueError("eligibility.end_date must not precede eligibility.start_date")
+        universe_version = section.get("universe_version", "legacy_unversioned")
+        if not isinstance(universe_version, str) or not universe_version.strip():
+            raise ValueError("universe_version must be a non-blank string")
         return cls(
             min_history_days=history,
             min_price=_nonnegative_number(min_price, "minimum_price"),
@@ -272,11 +308,14 @@ class UniverseParameters:
             average_dollar_volume_window_days=window,
             us_exchanges=exchanges,
             eligible_security_types=security_types,
-            classification_as_of_date=as_of,
+            classification_snapshot_date=as_of,
             allow_classification_before_as_of=historical,
             allowed_universe_tiers=tiers,
             allowed_exchange_or_markets=markets,
             allow_adrs=allow_adrs,
+            universe_version=universe_version.strip(),
+            eligibility_start_date=eligibility_start,
+            eligibility_end_date=eligibility_end,
         )
 
 
@@ -287,6 +326,18 @@ def _nonnegative_number(value: object, name: str) -> float:
     if not math.isfinite(numeric) or numeric < 0:
         raise ValueError(f"{name} must be a non-negative number")
     return numeric
+
+
+def _optional_date(value: object, name: str) -> pd.Timestamp | None:
+    if value is None:
+        return None
+    try:
+        parsed = pd.Timestamp(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{name} must be a date") from error
+    if parsed.tz is not None or parsed != parsed.normalize():
+        raise ValueError(f"{name} must be timezone-naive and date-only")
+    return parsed
 
 
 def _nonempty_strings(value: object, name: str) -> tuple[str, ...]:
@@ -361,6 +412,16 @@ def build_universe_membership(
     reasons: list[tuple[str, pd.Series]] = [
         ("missing_semiconductor_classification", ~evaluated["is_semiconductor"])
     ]
+    if parameters.eligibility_start_date is not None:
+        reasons.append((
+            "before_eligibility_start_date",
+            evaluated["date"].lt(parameters.eligibility_start_date),
+        ))
+    if parameters.eligibility_end_date is not None:
+        reasons.append((
+            "after_eligibility_end_date",
+            evaluated["date"].gt(parameters.eligibility_end_date),
+        ))
     if "universe_tier" in evaluated:
         reasons.append((
             "universe_tier_not_allowed",
@@ -383,7 +444,7 @@ def build_universe_membership(
         reasons.append((
             "classification_not_available_as_of_date",
             evaluated["is_semiconductor"]
-            & evaluated["date"].lt(parameters.classification_as_of_date),
+            & evaluated["date"].lt(parameters.classification_snapshot_date),
         ))
     has_data = evaluated["close"].notna()
     reasons.extend([
@@ -558,6 +619,21 @@ def create_universe_manifest(
     creation_timestamp: str | None = None,
 ) -> dict[str, object]:
     """Create a JSON-serializable provenance record for one universe run."""
+    metadata_file = Path(metadata_path)
+    displayed_metadata_file = (
+        metadata_file.relative_to(PROJECT_ROOT)
+        if metadata_file.is_absolute() and metadata_file.is_relative_to(PROJECT_ROOT)
+        else metadata_file
+    )
+    section = universe_config.get("universe", universe_config)
+    if not isinstance(section, Mapping):
+        raise ValueError("universe configuration must be a mapping")
+    classification_date = section.get(
+        "classification_snapshot_date", section.get("classification_as_of_date")
+    )
+    eligibility = section.get("eligibility", {})
+    if not isinstance(eligibility, Mapping):
+        eligibility = {}
     latest_eligible = 0 if membership.empty else int(
         membership.loc[
             membership["date"].eq(membership["date"].max()), "eligible"
@@ -565,8 +641,16 @@ def create_universe_manifest(
     )
     counts = security_master["subsector"].value_counts().sort_index()
     return {
-        "metadata_file": str(Path(metadata_path)),
+        "metadata_file": str(displayed_metadata_file),
         "metadata_sha256": metadata_sha256(metadata_path),
+        "universe_version": section.get("universe_version", "legacy_unversioned"),
+        "classification_snapshot_date": classification_date,
+        "eligibility_start_date": eligibility.get(
+            "start_date", section.get("eligibility_start_date")
+        ),
+        "eligibility_end_date": eligibility.get(
+            "end_date", section.get("eligibility_end_date")
+        ),
         "universe_configuration": json.loads(
             json.dumps(dict(universe_config), default=str)
         ),
