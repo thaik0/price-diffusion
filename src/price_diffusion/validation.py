@@ -212,6 +212,42 @@ def validate_daily_panel(frame: pd.DataFrame, security_master: pd.DataFrame) -> 
     if "volume" in frame and is_numeric_dtype(frame["volume"]):
         if frame["volume"].lt(0).any():
             issues.append(_issue(DAILY_PANEL, "negative_volume", "volume must be >= 0"))
+    return_inputs = {"date", "security_id", "adjusted_close", "return"}
+    can_check_returns = (
+        return_inputs <= set(frame.columns)
+        and is_datetime64_any_dtype(frame["date"])
+        and is_numeric_dtype(frame["adjusted_close"])
+        and is_numeric_dtype(frame["return"])
+        and not frame[["date", "security_id", "adjusted_close"]].isna().any().any()
+        and not frame.duplicated(["date", "security_id"]).any()
+        and np.isfinite(frame["adjusted_close"].to_numpy()).all()
+        and frame["adjusted_close"].gt(0).all()
+    )
+    if can_check_returns:
+        ordered = frame.sort_values(["security_id", "date"], kind="stable")
+        prior = ordered.groupby("security_id", sort=False)["adjusted_close"].shift(1)
+        expected = ordered["adjusted_close"].div(prior).sub(1.0)
+        actual = ordered["return"]
+        first_observation = prior.isna()
+        invalid_first = actual[first_observation].notna()
+        later = ~first_observation
+        invalid_later = actual[later].isna()
+        comparable = later & actual.notna()
+        mismatch = ~np.isclose(
+            actual[comparable].to_numpy(dtype=float),
+            expected[comparable].to_numpy(dtype=float),
+            rtol=1e-10,
+            atol=1e-12,
+        )
+        invalid_count = int(invalid_first.sum() + invalid_later.sum() + mismatch.sum())
+        if invalid_count:
+            issues.append(
+                _issue(
+                    DAILY_PANEL,
+                    "invalid_return",
+                    f"{invalid_count} returns do not match adjusted-close simple returns",
+                )
+            )
     _raise_if_issues(issues)
 
 

@@ -6,9 +6,10 @@ discovery propagates across economically related firms.
 
 ## Current status
 
-Stage 2 defines and validates the four core research datasets. It deliberately
-does **not** download market data, connect to external APIs, detect events,
-calculate strategies, or perform statistical analysis.
+Stage 3 adds provider-neutral CSV ingestion and constructs a validated daily
+market panel from raw observations. It deliberately does **not** connect to
+external APIs, detect events, calculate strategies or peer diffusion metrics,
+or perform statistical analysis.
 
 ## Design philosophy
 
@@ -62,12 +63,13 @@ the date in each key forces downstream joins to state which historical snapshot
 they use and allows changes in listings, eligibility, and economic relationships
 to be represented without rewriting history.
 
-### Future market-data boundary
+### Market-data boundary
 
-Future source adapters will write immutable vendor responses to `data/raw/`,
-standardize identifiers, dates, corporate-action adjustments, and units in
-`data/interim/`, then construct these four frames. Before any frame is promoted
-to `data/processed/` or consumed by event and strategy code, call:
+Source adapters write immutable vendor responses to `data/raw/`; the Stage 3
+pipeline standardizes identifiers and dates, calculates adjusted-close simple
+returns, and validates the result before it is promoted to `data/processed/`.
+CSV is the first adapter, behind an interface intended for future API or vendor
+implementations. For validation of all four research frames, call:
 
 ```python
 from price_diffusion.validation import validate_research_data
@@ -86,6 +88,22 @@ group and record the transformation in provenance metadata. Deterministic
 synthetic examples are available from
 `price_diffusion.synthetic.make_synthetic_research_data` for adapter and
 pipeline tests that must not use external data.
+
+Construct a daily panel from CSV with:
+
+```python
+from price_diffusion.market_data import CSVMarketDataSource, ingest_market_data
+
+source = CSVMarketDataSource(
+    "data/raw/vendor_prices.csv",
+    column_map={"Symbol": "ticker", "Adj Close": "adjusted_close"},
+)
+daily_panel = ingest_market_data(source, security_master)
+```
+
+Raw canonical columns are `date`, `ticker`, `adjusted_close`, `close`, and
+`volume`. Missing rows remain gaps: returns compare each security's consecutive
+available observations and do not invent calendar-day records.
 
 ## Setup
 

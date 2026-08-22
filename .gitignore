@@ -6,6 +6,7 @@ __pycache__/
 build/
 dist/
 .ipynb_checkpoints/
+research_notes/
 
 # Keep directory markers, but do not version generated or downloaded data.
 data/raw/*
