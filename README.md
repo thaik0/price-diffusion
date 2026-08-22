@@ -6,11 +6,12 @@ discovery propagates across economically related firms.
 
 ## Current status
 
-Stage 7 adds pre-specified detection of unusually large peer-relative abnormal
-returns. Thresholds use strictly trailing volatility, with peer/history gates,
-corporate-action classification, firm and peer-group cooldowns, and flags for
-simultaneous related movers. It does **not** identify information releases, run
-event studies, calculate post-event returns, or build trading strategies.
+Stage 10 adds random-peer and matched pseudo-event placebos, a causal
+regime-stratified selection-preserving return null, reversed-time falsification,
+and firm/date block bootstraps. Every experiment reuses the pre-specified Stage 7
+event detector and Stage 8 outcome engine rather than changing thresholds or
+horizons after observing results. See `research_notes/stage_10_null_models.md`
+for assumptions, interpretation, and limitations.
 
 ## Design philosophy
 

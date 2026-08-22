@@ -59,6 +59,22 @@ statistical_inference:
   bootstrap_iterations: 2000
   cluster_by: firm
 
+robustness:
+  # Pre-specified Stage 10 experiments. Production runs should use these full
+  # iteration counts; tests use smaller explicit configurations.
+  random_peer_iterations: 500
+  pseudo_event_iterations: 500
+  null_iterations: 1000
+  bootstrap_iterations: 2000
+  date_block_length: 5
+  confidence_level: 0.95
+  pseudo_event_exclusion_days: 10
+  match_columns:
+    - subsector
+    - volatility_regime
+    - market_regime
+    - liquidity_bucket
+
 peer_definition:
   method: industry_group
   minimum_peers: 3

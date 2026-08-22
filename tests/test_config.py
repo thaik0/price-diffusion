@@ -3,6 +3,7 @@ from pathlib import Path
 from price_diffusion.config import REQUIRED_SECTIONS, load_config
 from price_diffusion.event_study import EventStudyConfig
 from price_diffusion.statistical_inference import InferenceConfig
+from price_diffusion.null_models import RobustnessConfig
 
 
 def test_baseline_config_loads() -> None:
@@ -29,6 +30,9 @@ def test_baseline_config_loads() -> None:
     inference = InferenceConfig.from_mapping(config)
     assert inference.cluster_by == "firm"
     assert inference.confidence_level == 0.95
+    robustness = RobustnessConfig.from_mapping(config)
+    assert robustness.null_iterations == 1000
+    assert robustness.date_block_length == 5
 
 
 def test_config_can_load_from_explicit_path() -> None:
