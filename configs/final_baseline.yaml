@@ -1,0 +1,108 @@
+# Stage 11B production baseline. Eligibility assumptions are version-controlled
+# and separate from researcher-owned economic classifications.
+universe:
+  name: semiconductor_equities
+  currency: USD
+  allowed_universe_tiers:
+    - core
+  minimum_price: 5.0
+  minimum_trading_history: 60
+  liquidity:
+    minimum_average_dollar_volume: 1000000.0
+    trailing_window_days: 20
+  listing_restrictions:
+    # Exact approved security lines. Changing this is a research-design decision.
+    allowed_exchange_or_markets:
+      - Nasdaq
+      - Nasdaq ADR
+      - Nasdaq ADR (primary Euronext Amsterdam)
+      - Nasdaq (also Tel Aviv Stock Exchange)
+      - NYSE
+      - NYSE ADR (underlying TWSE 2303)
+      - NYSE ADR (underlying TWSE 2330)
+      - NYSE ADR (underlying TWSE 3711)
+      - New York Stock Exchange
+      - NYSE (also Euronext Paris and Borsa Italiana)
+      - Euronext Amsterdam
+      - Euronext Milan
+      - Euronext Paris
+      - Xetra
+      - Tokyo Stock Exchange
+      - Korea Exchange (KRX)
+      - Taiwan Stock Exchange
+      - Hong Kong Stock Exchange (also SSE STAR 688347)
+      - Hong Kong Stock Exchange (also SSE STAR 688981)
+      - Shanghai Stock Exchange
+      - Shanghai Stock Exchange STAR Market
+      - Shenzhen Stock Exchange
+    eligible_security_types:
+      - common_stock
+      - adr
+  adr_handling:
+    allow: true
+    prefer_primary_listing: false
+    require_ratio_adjusted_volume: false
+  # Current manual review snapshot. Retrospective classification is fail-closed.
+  classification_as_of_date: "2026-08-22"
+  allow_classification_before_as_of: false
+  coverage_checks:
+    factor_model_min_history: 252
+    short_public_history_days: 252
+    ticker_change_gap_days: 30
+
+date_range:
+  start: "2015-01-01"
+  end: "2025-12-31"
+
+event_thresholds:
+  minimum_relative_move: 0.05
+  volatility_window: 60
+  threshold_multiplier: 3.0
+  cooldown_period: 5
+  cooldown_scope: both
+  minimum_peer_count: 3
+  minimum_history_requirement: 60
+  exclude_corporate_action_types:
+    - split
+    - merger
+    - abnormal_price_adjustment
+    - unknown
+
+event_study:
+  primary_horizons: [1, 5]
+  descriptive_horizons: [3, 10]
+  event_window:
+    pre_event_days: 5
+    post_event_days: 10
+  return_specification: semiconductor_adjusted_return
+
+statistical_inference:
+  confidence_level: 0.95
+  interval_method: analytical
+  trim_proportion: 0.10
+  bootstrap_iterations: 2000
+  cluster_by: firm
+
+robustness:
+  random_peer_iterations: 500
+  pseudo_event_iterations: 500
+  null_iterations: 1000
+  bootstrap_iterations: 2000
+  date_block_length: 5
+  confidence_level: 0.95
+  pseudo_event_exclusion_days: 10
+  match_columns: [subsector, volatility_regime, market_regime, liquidity_bucket]
+
+peer_definition:
+  method: industry_group
+  minimum_peers: 3
+  maximum_peers: 10
+
+random_seed: 42
+
+output_paths:
+  root: outputs
+  figures: outputs/figures
+  tables: outputs/tables
+  diagnostics: outputs/diagnostics
+  manifests: outputs/manifests

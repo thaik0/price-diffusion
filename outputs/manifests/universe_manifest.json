@@ -1,0 +1,76 @@
+{
+  "creation_timestamp": "2026-08-22T23:13:53.507209+00:00",
+  "eligibility_as_of_date": null,
+  "eligibility_status": "not_computed_no_market_data",
+  "metadata_file": "metadata/semiconductor_classification.csv",
+  "metadata_sha256": "e9dec9831953c0ec0a84419ad035e13944cfd6ff978d08a61f185ac0a3e3984c",
+  "number_eligible": 0,
+  "number_of_securities": 54,
+  "subsector_counts": {
+    "analog_mixed_signal": 10,
+    "eda_ip": 3,
+    "fabless_compute": 7,
+    "fabless_mobile_connectivity": 2,
+    "foundry": 6,
+    "integrated_device_manufacturer": 1,
+    "memory": 5,
+    "packaging_testing": 5,
+    "semiconductor_equipment": 9,
+    "semiconductor_materials": 6
+  },
+  "universe_configuration": {
+    "adr_handling": {
+      "allow": true,
+      "prefer_primary_listing": false,
+      "require_ratio_adjusted_volume": false
+    },
+    "allow_classification_before_as_of": false,
+    "allowed_universe_tiers": [
+      "core"
+    ],
+    "classification_as_of_date": "2026-08-22",
+    "coverage_checks": {
+      "factor_model_min_history": 252,
+      "short_public_history_days": 252,
+      "ticker_change_gap_days": 30
+    },
+    "currency": "USD",
+    "liquidity": {
+      "minimum_average_dollar_volume": 1000000.0,
+      "trailing_window_days": 20
+    },
+    "listing_restrictions": {
+      "allowed_exchange_or_markets": [
+        "Nasdaq",
+        "Nasdaq ADR",
+        "Nasdaq ADR (primary Euronext Amsterdam)",
+        "Nasdaq (also Tel Aviv Stock Exchange)",
+        "NYSE",
+        "NYSE ADR (underlying TWSE 2303)",
+        "NYSE ADR (underlying TWSE 2330)",
+        "NYSE ADR (underlying TWSE 3711)",
+        "New York Stock Exchange",
+        "NYSE (also Euronext Paris and Borsa Italiana)",
+        "Euronext Amsterdam",
+        "Euronext Milan",
+        "Euronext Paris",
+        "Xetra",
+        "Tokyo Stock Exchange",
+        "Korea Exchange (KRX)",
+        "Taiwan Stock Exchange",
+        "Hong Kong Stock Exchange (also SSE STAR 688347)",
+        "Hong Kong Stock Exchange (also SSE STAR 688981)",
+        "Shanghai Stock Exchange",
+        "Shanghai Stock Exchange STAR Market",
+        "Shenzhen Stock Exchange"
+      ],
+      "eligible_security_types": [
+        "common_stock",
+        "adr"
+      ]
+    },
+    "minimum_price": 5.0,
+    "minimum_trading_history": 60,
+    "name": "semiconductor_equities"
+  }
+}
