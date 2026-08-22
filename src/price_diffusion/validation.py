@@ -13,6 +13,8 @@ from pandas.api.types import (
 
 from price_diffusion.data_contracts import (
     DAILY_PANEL,
+    EVENT_OUTCOMES,
+    EVENT_PANEL,
     EVENTS,
     PEER_CLASSIFICATION,
     PEER_MEMBERSHIP,
@@ -401,6 +403,65 @@ def validate_events(
         if frame["relative_return"].abs().le(frame["threshold_used"]).any():
             issues.append(
                 _issue(EVENTS, "non_event", "every event must strictly exceed its threshold")
+            )
+    _raise_if_issues(issues)
+
+
+def validate_event_panel(frame: pd.DataFrame) -> None:
+    """Validate the Stage 8 long event-time panel."""
+    issues = collect_contract_issues(frame, EVENT_PANEL)
+    if "direction" in frame and (~frame["direction"].isin({"positive", "negative"})).any():
+        issues.append(
+            _issue(EVENT_PANEL, "invalid_direction", "direction must be positive or negative")
+        )
+    required = {"valid_observation", "initiator_return", "peer_return"}
+    if required <= set(frame.columns):
+        expected = frame["initiator_return"].notna() & frame["peer_return"].notna()
+        if not frame["valid_observation"].eq(expected).all():
+            issues.append(
+                _issue(
+                    EVENT_PANEL,
+                    "invalid_observation_flag",
+                    "valid_observation must identify complete initiator and peer returns",
+                )
+            )
+    _raise_if_issues(issues)
+
+
+def validate_event_outcomes(frame: pd.DataFrame) -> None:
+    """Validate Stage 8 horizon rows and the convergence identity."""
+    issues = collect_contract_issues(frame, EVENT_OUTCOMES)
+    if "direction" in frame and (~frame["direction"].isin({"positive", "negative"})).any():
+        issues.append(
+            _issue(EVENT_OUTCOMES, "invalid_direction", "direction must be positive or negative")
+        )
+    required = {
+        "valid_horizon",
+        "missing_reason",
+        "peer_catchup",
+        "initiator_reversal",
+        "convergence",
+    }
+    if required <= set(frame.columns):
+        invalid_reason = frame["valid_horizon"] & frame["missing_reason"].notna()
+        missing_invalid_reason = ~frame["valid_horizon"] & frame["missing_reason"].isna()
+        if invalid_reason.any() or missing_invalid_reason.any():
+            issues.append(
+                _issue(
+                    EVENT_OUTCOMES,
+                    "invalid_missing_reason",
+                    "only invalid horizons must have a missing_reason",
+                )
+            )
+        valid = frame.loc[frame["valid_horizon"]]
+        identity = valid["peer_catchup"] + valid["initiator_reversal"]
+        if not np.allclose(valid["convergence"], identity, atol=1e-12, rtol=1e-12):
+            issues.append(
+                _issue(
+                    EVENT_OUTCOMES,
+                    "invalid_convergence",
+                    "convergence must equal peer catch-up plus initiator reversal",
+                )
             )
     _raise_if_issues(issues)
 

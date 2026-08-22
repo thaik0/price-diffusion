@@ -1,6 +1,8 @@
 from price_diffusion.data_contracts import (
     DAILY_PANEL,
     DATA_CONTRACTS,
+    EVENT_OUTCOMES,
+    EVENT_PANEL,
     EVENTS,
     PEER_MEMBERSHIP,
     PEER_CLASSIFICATION,
@@ -22,6 +24,8 @@ def test_all_core_contracts_are_registered() -> None:
         "peer_classification",
         "relative_returns",
         "events",
+        "event_panel",
+        "event_outcomes",
     }
 
 
@@ -43,6 +47,8 @@ def test_contract_primary_keys_are_explicit() -> None:
         "peer_definition",
     )
     assert EVENTS.primary_key == ("event_id",)
+    assert EVENT_PANEL.primary_key == ("event_id", "relative_day", "return_specification")
+    assert EVENT_OUTCOMES.primary_key == ("event_id", "horizon", "return_specification")
 
 
 def test_nullable_core_fields_are_explicit() -> None:
@@ -64,5 +70,18 @@ def test_nullable_core_fields_are_explicit() -> None:
         ("events", "volume"),
         ("events", "market_cap"),
         ("events", "simultaneous_event_group"),
+        ("event_panel", "calendar_date"),
+        ("event_panel", "initiator_return"),
+        ("event_panel", "peer_return"),
+        ("event_panel", "signed_initiator_return"),
+        ("event_panel", "signed_peer_return"),
+        ("event_outcomes", "initiator_car"),
+        ("event_outcomes", "peer_car"),
+        ("event_outcomes", "peer_catchup"),
+        ("event_outcomes", "initiator_reversal"),
+        ("event_outcomes", "convergence"),
+        ("event_outcomes", "simultaneous_event_group"),
+        ("event_outcomes", "earnings_flag"),
+        ("event_outcomes", "missing_reason"),
     }
     assert DAILY_PANEL.columns["return"].kind is ColumnKind.NUMERIC

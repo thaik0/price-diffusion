@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from price_diffusion.config import REQUIRED_SECTIONS, load_config
+from price_diffusion.event_study import EventStudyConfig
 
 
 def test_baseline_config_loads() -> None:
@@ -18,6 +19,12 @@ def test_baseline_config_loads() -> None:
     assert event["threshold_multiplier"] >= 0
     assert event["cooldown_period"] >= 0
     assert event["minimum_peer_count"] > 0
+    study = config["event_study"]
+    assert study["primary_horizons"] == [1, 5]
+    assert study["descriptive_horizons"] == [3, 10]
+    assert max(study["primary_horizons"] + study["descriptive_horizons"]) <= study["event_window"]["post_event_days"]
+    parameters = EventStudyConfig.from_mapping(config)
+    assert parameters.horizons == (1, 3, 5, 10)
 
 
 def test_config_can_load_from_explicit_path() -> None:

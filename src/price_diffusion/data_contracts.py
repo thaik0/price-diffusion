@@ -163,6 +163,54 @@ EVENTS = DataFrameContract(
     primary_key=("event_id",),
 )
 
+EVENT_PANEL = DataFrameContract(
+    name="event_panel",
+    columns=_columns(
+        event_id=ColumnContract(ColumnKind.STRING),
+        event_date=ColumnContract(ColumnKind.DATE),
+        security_id=ColumnContract(ColumnKind.STRING),
+        relative_day=ColumnContract(ColumnKind.NUMERIC, finite=True),
+        calendar_date=ColumnContract(ColumnKind.DATE, nullable=True),
+        direction=ColumnContract(ColumnKind.STRING),
+        peer_definition=ColumnContract(ColumnKind.STRING),
+        return_specification=ColumnContract(ColumnKind.STRING),
+        initiator_return=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        peer_return=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        signed_initiator_return=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        signed_peer_return=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        valid_observation=ColumnContract(ColumnKind.BOOLEAN),
+        event_date_peer_membership_valid=ColumnContract(ColumnKind.BOOLEAN),
+    ),
+    primary_key=("event_id", "relative_day", "return_specification"),
+)
+
+EVENT_OUTCOMES = DataFrameContract(
+    name="event_outcomes",
+    columns=_columns(
+        event_id=ColumnContract(ColumnKind.STRING),
+        event_date=ColumnContract(ColumnKind.DATE),
+        security_id=ColumnContract(ColumnKind.STRING),
+        direction=ColumnContract(ColumnKind.STRING),
+        peer_definition=ColumnContract(ColumnKind.STRING),
+        subsector=ColumnContract(ColumnKind.STRING),
+        horizon=ColumnContract(ColumnKind.NUMERIC, finite=True),
+        return_specification=ColumnContract(ColumnKind.STRING),
+        initiator_car=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        peer_car=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        peer_catchup=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        initiator_reversal=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        convergence=ColumnContract(ColumnKind.NUMERIC, nullable=True, finite=True),
+        initial_relative_shock=ColumnContract(ColumnKind.NUMERIC, finite=True),
+        relative_volatility=ColumnContract(ColumnKind.NUMERIC, finite=True),
+        simultaneous_event_group=ColumnContract(ColumnKind.STRING, nullable=True),
+        earnings_flag=ColumnContract(ColumnKind.BOOLEAN, nullable=True),
+        overlapping_post_event_window=ColumnContract(ColumnKind.BOOLEAN),
+        valid_horizon=ColumnContract(ColumnKind.BOOLEAN),
+        missing_reason=ColumnContract(ColumnKind.STRING, nullable=True),
+    ),
+    primary_key=("event_id", "horizon", "return_specification"),
+)
+
 DATA_CONTRACTS = MappingProxyType(
     {
         contract.name: contract
@@ -175,6 +223,8 @@ DATA_CONTRACTS = MappingProxyType(
             PEER_MEMBERSHIP,
             RELATIVE_RETURNS,
             EVENTS,
+            EVENT_PANEL,
+            EVENT_OUTCOMES,
         )
     }
 )

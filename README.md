@@ -249,6 +249,33 @@ version-controlled configuration. Treat notebook outputs as disposable unless
 an artifact is intentionally written to `outputs/figures/`, `outputs/tables/`,
 or `outputs/diagnostics/`.
 
+## Descriptive event study
+
+Stage 8 freezes each event's dated peer membership and weights, builds a long
+event-time panel, and measures t+1 through t+h initiator CAR, peer CAR, peer
+catch-up, initiator reversal, and their total convergence. The selected return
+column and its specification label are explicit, and incomplete horizons remain
+in the output with a reason.
+
+```python
+from price_diffusion.event_study import run_event_study
+
+result = run_event_study(
+    events,
+    abnormal_returns,
+    peer_membership,
+    config,
+    return_column="semiconductor_adjusted_return",
+    return_specification="semiconductor_adjusted_return",
+)
+event_panel = result.event_panel
+event_outcomes = result.outcomes
+diagnostics = result.diagnostics
+```
+
+These outputs are descriptive only. Stage 8 does not perform significance
+tests or support causal claims about information diffusion.
+
 ## Repository layout
 
 ```text

@@ -8,6 +8,8 @@ dist/
 .ipynb_checkpoints/
 research_notes/*
 !research_notes/*.md
+# Stage notes are educational working notes rather than research artifacts.
+research_notes/stage_08_event_study.md
 
 # Keep directory markers, but do not version generated or downloaded data.
 data/raw/*

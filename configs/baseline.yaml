@@ -38,6 +38,19 @@ event_thresholds:
     - abnormal_price_adjustment
     - unknown
 
+event_study:
+  # Outcomes start at t+1; day 0 is retained only in the event-time panel.
+  primary_horizons:
+    - 1
+    - 5
+  descriptive_horizons:
+    - 3
+    - 10
+  event_window:
+    pre_event_days: 5
+    post_event_days: 10
+  return_specification: semiconductor_adjusted_return
+
 peer_definition:
   method: industry_group
   minimum_peers: 3

@@ -13,6 +13,7 @@ REQUIRED_SECTIONS = {
     "universe",
     "date_range",
     "event_thresholds",
+    "event_study",
     "peer_definition",
     "random_seed",
     "output_paths",
