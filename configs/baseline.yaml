@@ -1,0 +1,28 @@
+# Baseline values are placeholders, not finalized empirical design choices.
+universe:
+  name: semiconductor_equities
+  symbols: []
+  exchanges: []
+  currency: USD
+
+date_range:
+  start: "2015-01-01"
+  end: "2025-12-31"
+
+event_thresholds:
+  return_z_score: 3.0
+  volume_z_score: 3.0
+  minimum_observations: 60
+
+peer_definition:
+  method: industry_group
+  minimum_peers: 3
+  maximum_peers: 10
+
+random_seed: 42
+
+output_paths:
+  root: outputs
+  figures: outputs/figures
+  tables: outputs/tables
+  diagnostics: outputs/diagnostics
