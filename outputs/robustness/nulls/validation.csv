@@ -1,9 +1,0 @@
-check,passed
-frozen_baseline_inputs_match_manifest,True
-random_peer_event_count_preserved,True
-pseudo_event_count_preserved,True
-matching_information_strictly_pre_event,True
-simulation_reran_event_selection,True
-simulation_never_used_future_donors,True
-all_null_methods_retained,True
-sample_sizes_reported,True

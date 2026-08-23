@@ -333,15 +333,12 @@ def run_specification_robustness(
     }
     if not all(checks.values()):
         raise AssertionError(f"specification validation failed: {checks}")
-    validation = pd.DataFrame({"check": checks.keys(), "passed": checks.values()})
-    validation.to_csv(directory / "validation.csv", index=False)
     return RobustnessArtifacts(
         {"specification_results": results, "specification_summary": summary},
         {
             "specification_results": result_path,
             "specification_summary": summary_path,
             "specification_curve": figure_path,
-            "validation": directory / "validation.csv",
         },
         checks,
     )
@@ -504,7 +501,6 @@ def run_selection_bias_and_nulls(
     figure_path = directory / "observed_vs_null_distribution.png"
     observed_null.to_csv(placebo_path, index=False)
     simulation.distribution.to_csv(simulation_path, index=False)
-    null_comparison.to_csv(directory / "observed_vs_null_results.csv", index=False)
     selected_comparison = null_comparison.loc[
         null_comparison["horizon"].eq(5)
         & null_comparison["outcome"].eq("peer_catchup")
@@ -544,9 +540,6 @@ def run_selection_bias_and_nulls(
     }
     if not all(checks.values()):
         raise AssertionError(f"null validation failed: {checks}")
-    pd.DataFrame({"check": checks.keys(), "passed": checks.values()}).to_csv(
-        directory / "validation.csv", index=False
-    )
     return RobustnessArtifacts(
         {
             "placebo_results": observed_null,
@@ -558,7 +551,6 @@ def run_selection_bias_and_nulls(
             "placebo_results": placebo_path,
             "simulation_distribution": simulation_path,
             "observed_vs_null_distribution": figure_path,
-            "validation": directory / "validation.csv",
         },
         checks,
     )
@@ -724,9 +716,6 @@ def run_sample_stability(
     }
     if not all(checks.values()):
         raise AssertionError(f"stability validation failed: {checks}")
-    pd.DataFrame({"check": checks.keys(), "passed": checks.values()}).to_csv(
-        directory / "validation.csv", index=False
-    )
     return RobustnessArtifacts(
         {
             "stability_results": stability,
@@ -737,7 +726,6 @@ def run_sample_stability(
             "stability_results": directory / "stability_results.csv",
             "event_dependence": directory / "event_dependence.csv",
             "bootstrap_summary": directory / "bootstrap_summary.csv",
-            "validation": directory / "validation.csv",
         },
         checks,
     )
@@ -749,7 +737,9 @@ def run_final_research_summary(
     """Create the Stage 17 evidence table and final Markdown research artifact."""
     specification = pd.read_csv(SPECIFICATION_DIR / "specification_results.csv")
     placebo = pd.read_csv(NULL_DIR / "placebo_results.csv")
-    null_results = pd.read_csv(NULL_DIR / "observed_vs_null_results.csv")
+    null_results = placebo.loc[placebo["method"].eq("observed")].drop_duplicates(
+        ["horizon", "return_specification", "peer_definition", "outcome"]
+    )
     stability = pd.read_csv(STABILITY_DIR / "stability_results.csv")
     peer = pd.read_csv(
         PROJECT_ROOT / "outputs" / "mechanism_analysis" / "peer_relationships" / "peer_definition_comparison.csv"
@@ -902,15 +892,11 @@ All requested variants were fixed before this run, weak and unavailable results 
     }
     if not all(checks.values()):
         raise AssertionError(f"final summary validation failed: {checks}")
-    pd.DataFrame({"check": checks.keys(), "passed": checks.values()}).to_csv(
-        directory / "validation.csv", index=False
-    )
     return RobustnessArtifacts(
         {"evidence_table": evidence},
         {
             "evidence_table": directory / "evidence_table.csv",
             "final_research_summary": report_path,
-            "validation": directory / "validation.csv",
         },
         checks,
     )

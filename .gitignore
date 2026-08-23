@@ -6,10 +6,8 @@ __pycache__/
 build/
 dist/
 .ipynb_checkpoints/
-research_notes/*
-!research_notes/*.md
-# Stage notes are educational working notes rather than research artifacts.
-research_notes/stage_08_event_study.md
+# Research notes are local working material, not repository artifacts.
+research_notes/
 
 # Keep directory markers, but do not version generated or downloaded data.
 data/raw/*
@@ -24,3 +22,7 @@ outputs/tables/*
 !outputs/tables/.gitkeep
 outputs/diagnostics/*
 !outputs/diagnostics/.gitkeep
+
+# Compact validation/intermediate tables are reproducible and remain local.
+outputs/robustness/*/validation.csv
+outputs/robustness/nulls/observed_vs_null_results.csv
