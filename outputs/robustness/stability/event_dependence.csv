@@ -1,0 +1,11 @@
+metric,value,interpretation
+valid_five_day_events,173.0,nominal event sample
+unique_initiators,20.0,upper bound on independent firm clusters
+unique_event_dates,138.0,upper bound on independent date clusters
+overlapping_window_share,0.8786127167630058,events whose post-event windows overlap another event
+same_day_event_share,0.3468208092485549,events occurring on dates with multiple sample events
+repeated_initiator_share,0.9942196531791907,events from initiators appearing more than once
+largest_initiator_share,0.09248554913294797,maximum firm concentration
+largest_date_share,0.028901734104046242,maximum date concentration
+herfindahl_effective_firms,16.23928377645144,concentration-adjusted firm count; not a formal ESS
+herfindahl_effective_dates,109.63003663003663,concentration-adjusted date count; not a formal ESS

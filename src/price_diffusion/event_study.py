@@ -227,14 +227,26 @@ def build_event_panel(
 
     calendar = pd.DatetimeIndex(sorted(returns["date"].dropna().unique()))
     return_lookup = returns.set_index(["date", "security_id"])[return_column]
+    event_keys = events[["date", "security_id", "peer_definition"]].drop_duplicates()
+    relevant_membership = peer_membership.merge(
+        event_keys,
+        on=["date", "security_id", "peer_definition"],
+        how="inner",
+        validate="many_to_one",
+    )
+    frozen_lookup = {
+        key: group.sort_values("peer_id", kind="stable")
+        for key, group in relevant_membership.groupby(
+            ["date", "security_id", "peer_definition"], sort=False
+        )
+    }
     rows: list[dict[str, object]] = []
     for event in events.sort_values(["date", "event_id"], kind="stable").itertuples(index=False):
         sign = _direction_sign(event.direction)
-        frozen = peer_membership.loc[
-            peer_membership["date"].eq(event.date)
-            & peer_membership["security_id"].eq(event.security_id)
-            & peer_membership["peer_definition"].eq(event.peer_definition)
-        ].sort_values("peer_id", kind="stable")
+        frozen = frozen_lookup.get(
+            (event.date, event.security_id, event.peer_definition),
+            peer_membership.iloc[0:0],
+        )
         weights_valid = not frozen.empty and np.isclose(frozen["weight"].sum(), 1.0, atol=1e-8)
         if not weights_valid:
             frozen = frozen.iloc[0:0]

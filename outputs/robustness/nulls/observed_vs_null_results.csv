@@ -1,0 +1,13 @@
+horizon,return_specification,peer_definition,outcome,observed_statistic,observed_sample_size,null_mean,null_standard_deviation,null_iterations,empirical_p_value,percentile_location,alternative
+1,semiconductor_adjusted_return,economic_subsector_peers,convergence,0.0053963111301805365,226,-0.0001216798271404219,0.0012163297914867413,500,0.001996007984031936,100.0,greater
+1,semiconductor_adjusted_return,economic_subsector_peers,peer_catchup,0.0026150612839820784,226,1.1364376467986085e-05,0.0006894611751039585,500,0.001996007984031936,100.0,greater
+1,semiconductor_adjusted_return,economic_subsector_peers,initiator_reversal,0.0027812498461984568,226,-0.00013304420360840802,0.0013322923152284565,500,0.017964071856287425,98.4,greater
+3,semiconductor_adjusted_return,economic_subsector_peers,convergence,0.0020598446295170703,196,-0.0004408302483237152,0.002815773422540717,500,0.17564870259481039,82.6,greater
+3,semiconductor_adjusted_return,economic_subsector_peers,peer_catchup,0.001762908247353488,196,2.182254128217953e-05,0.0013609251424613524,500,0.08982035928143713,91.2,greater
+3,semiconductor_adjusted_return,economic_subsector_peers,initiator_reversal,0.0002969363821635826,196,-0.00046265278960589475,0.0029233576411741937,500,0.38323353293413176,61.8,greater
+5,semiconductor_adjusted_return,economic_subsector_peers,convergence,0.003760951149214081,173,-0.0007660686257740112,0.004082002455247706,500,0.12974051896207583,87.2,greater
+5,semiconductor_adjusted_return,economic_subsector_peers,peer_catchup,0.0021766361934518535,173,0.0001754452467430218,0.002137440261604886,500,0.16966067864271456,83.2,greater
+5,semiconductor_adjusted_return,economic_subsector_peers,initiator_reversal,0.0015843149557622281,173,-0.0009415138725170332,0.00430161087939461,500,0.2754491017964072,72.6,greater
+10,semiconductor_adjusted_return,economic_subsector_peers,convergence,-0.0014756532783217814,114,-0.0019640234688249564,0.009470227539269438,500,0.5189620758483033,48.2,greater
+10,semiconductor_adjusted_return,economic_subsector_peers,peer_catchup,0.002647004570049579,114,0.0006250178760388629,0.004866364083810124,500,0.3073852295409182,69.4,greater
+10,semiconductor_adjusted_return,economic_subsector_peers,initiator_reversal,-0.004122657848371359,114,-0.002589041344863819,0.009926967044027367,500,0.5768463073852296,42.4,greater

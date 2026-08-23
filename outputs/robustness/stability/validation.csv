@@ -1,0 +1,7 @@
+check,passed
+frozen_baseline_inputs_match_manifest,True
+time_periods_fixed_before_outcome_summary,True
+all_initiators_disclosed,True
+event_dependence_reported,True
+all_bootstrap_methods_reported,True
+sample_sizes_reported,True

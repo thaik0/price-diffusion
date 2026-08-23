@@ -1,0 +1,5 @@
+check,passed
+required_stage_outputs_loaded,True
+all_hypotheses_reported,True
+limitations_explicit,True
+no_causal_claim,True

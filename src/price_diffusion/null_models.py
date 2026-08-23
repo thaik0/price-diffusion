@@ -149,21 +149,25 @@ def sample_random_peer_membership(
     rng = np.random.default_rng(random_seed)
     rows: list[dict[str, object]] = []
     eligible = universe_membership.loc[universe_membership["eligible"].astype(bool)]
+    original_lookup = {
+        key: group.sort_values("peer_id", kind="stable")
+        for key, group in economic_peer_membership.groupby(
+            ["date", "security_id", "peer_definition"], sort=False
+        )
+    }
+    eligible_by_date = {
+        date: np.sort(group["security_id"].astype(str).unique())
+        for date, group in eligible.groupby("date", sort=False)
+    }
     for event in events.sort_values(["date", "event_id"], kind="stable").itertuples(index=False):
-        original = economic_peer_membership.loc[
-            economic_peer_membership["date"].eq(event.date)
-            & economic_peer_membership["security_id"].eq(event.security_id)
-            & economic_peer_membership["peer_definition"].eq(event.peer_definition)
-        ].sort_values("peer_id", kind="stable")
+        original = original_lookup.get(
+            (event.date, event.security_id, event.peer_definition),
+            economic_peer_membership.iloc[0:0],
+        )
         if original.empty:
             raise ValueError(f"event {event.event_id} has no event-date economic peers")
-        candidates = np.sort(
-            eligible.loc[
-                eligible["date"].eq(event.date)
-                & eligible["security_id"].ne(event.security_id),
-                "security_id",
-            ].astype(str).unique()
-        )
+        candidates = eligible_by_date.get(event.date, np.array([], dtype=object))
+        candidates = candidates[candidates != event.security_id]
         if len(candidates) < len(original):
             raise ValueError(f"event {event.event_id} has too few eligible random-peer candidates")
         selected = rng.choice(candidates, size=len(original), replace=False)
@@ -209,7 +213,10 @@ def validate_random_peer_placebo(
 
     event_keys = events[key].drop_duplicates()
     actual_counts = random_membership.groupby(key).size().rename("random_count")
-    original_counts = economic_peer_membership.groupby(key).size().rename("original_count")
+    relevant_original = economic_peer_membership.merge(
+        event_keys, on=key, how="inner", validate="many_to_one"
+    )
+    original_counts = relevant_original.groupby(key).size().rename("original_count")
     counts = event_keys.merge(actual_counts, on=key, how="left").merge(
         original_counts, on=key, how="left"
     )
@@ -228,10 +235,12 @@ def validate_random_peer_placebo(
     if checked["_merge"].ne("both").any():
         raise ValueError("random peers must be eligible on the event date")
 
+    original_lookup = {
+        keys: group
+        for keys, group in relevant_original.groupby(key, sort=False)
+    }
     for keys, random_group in random_membership.groupby(key, sort=False):
-        original = economic_peer_membership
-        for column, value in zip(key, keys, strict=True):
-            original = original.loc[original[column].eq(value)]
+        original = original_lookup[keys]
         if not np.allclose(
             np.sort(random_group["weight"].to_numpy(float)),
             np.sort(original["weight"].to_numpy(float)),
@@ -254,12 +263,22 @@ def run_random_peer_placebo(
 ) -> pd.DataFrame:
     """Run repeated event studies with eligible random event-date peers."""
     parameters = _parameters(config)
+    event_keys = events[["date", "security_id", "peer_definition"]].drop_duplicates()
+    relevant_economic_membership = economic_peer_membership.merge(
+        event_keys,
+        on=["date", "security_id", "peer_definition"],
+        how="inner",
+        validate="many_to_one",
+    )
+    relevant_universe = universe_membership.loc[
+        universe_membership["date"].isin(events["date"].unique())
+    ].copy()
     outputs: list[pd.DataFrame] = []
     for iteration in range(parameters.random_peer_iterations):
         membership = sample_random_peer_membership(
             events,
-            economic_peer_membership,
-            universe_membership,
+            relevant_economic_membership,
+            relevant_universe,
             random_seed=parameters.random_seed + iteration,
         )
         outcomes = run_event_study(
@@ -304,38 +323,42 @@ def sample_pseudo_events(
         firm: tuple(group["date"])
         for firm, group in events.groupby("security_id", sort=False)
     }
+    matching_by_firm = {
+        firm: group.copy()
+        for firm, group in matching_panel.groupby("security_id", sort=False)
+    }
+    matching_lookup = matching_panel.set_index(["date", "security_id"])
     valid_peer_keys = peer_membership.groupby(
         ["date", "security_id", "peer_definition"], as_index=False
     )["weight"].sum()
     valid_peer_keys = valid_peer_keys.loc[np.isclose(valid_peer_keys["weight"], 1.0)]
+    valid_peer_dates = {
+        (security_id, definition): set(group["date"])
+        for (security_id, definition), group in valid_peer_keys.groupby(
+            ["security_id", "peer_definition"], sort=False
+        )
+    }
     rows: list[dict[str, object]] = []
     for event in events.sort_values(["date", "event_id"], kind="stable").itertuples(index=False):
         event_dict = event._asdict()
-        source_match = matching_panel.loc[
-            matching_panel["date"].eq(event.date)
-            & matching_panel["security_id"].eq(event.security_id)
-        ]
-        if len(source_match) != 1:
+        try:
+            source = matching_lookup.loc[(event.date, event.security_id)]
+        except KeyError as error:
+            raise ValueError(f"event {event.event_id} must have one matching-panel row") from error
+        if isinstance(source, pd.DataFrame):
             raise ValueError(f"event {event.event_id} must have one matching-panel row")
-        source = source_match.iloc[0]
-        candidates = matching_panel.loc[
-            matching_panel["security_id"].eq(event.security_id)
-            & matching_panel["eligible"].astype(bool)
-        ].copy()
+        candidates = matching_by_firm[event.security_id]
+        candidates = candidates.loc[candidates["eligible"].astype(bool)].copy()
         for column in match_columns:
             candidates = candidates.loc[candidates[column].eq(source[column])]
         for real_date in real_dates_by_firm[event.security_id]:
             distance = (candidates["date"] - real_date).abs().dt.days
             candidates = candidates.loc[distance.gt(exclusion_days)]
-        candidates = candidates.merge(
-            valid_peer_keys.loc[
-                valid_peer_keys["security_id"].eq(event.security_id)
-                & valid_peer_keys["peer_definition"].eq(event.peer_definition),
-                ["date"],
-            ].drop_duplicates(),
-            on="date",
-            how="inner",
-        )
+        candidates = candidates.loc[
+            candidates["date"].isin(
+                valid_peer_dates.get((event.security_id, event.peer_definition), set())
+            )
+        ]
         if candidates.empty:
             raise ValueError(f"event {event.event_id} has no eligible exactly matched pseudo-date")
         chosen = candidates.iloc[int(rng.integers(0, len(candidates)))]
@@ -414,12 +437,19 @@ def run_pseudo_event_placebo(
 ) -> pd.DataFrame:
     """Run event studies on matched, eligible non-event dates."""
     parameters = _parameters(config)
+    event_firms = set(events["security_id"])
+    relevant_matching_panel = matching_panel.loc[
+        matching_panel["security_id"].isin(event_firms)
+    ].copy()
+    relevant_peer_membership = peer_membership.loc[
+        peer_membership["security_id"].isin(event_firms)
+    ].copy()
     outputs: list[pd.DataFrame] = []
     for iteration in range(parameters.pseudo_event_iterations):
         pseudo = sample_pseudo_events(
             events,
-            matching_panel,
-            peer_membership,
+            relevant_matching_panel,
+            relevant_peer_membership,
             match_columns=parameters.match_columns,
             exclusion_days=parameters.pseudo_event_exclusion_days,
             random_seed=parameters.random_seed + 100_000 + iteration,
@@ -427,7 +457,7 @@ def run_pseudo_event_placebo(
         outcomes = run_event_study(
             pseudo,
             returns,
-            peer_membership,
+            relevant_peer_membership,
             event_study_config,
             return_column=return_column,
             return_specification=return_specification,
@@ -494,17 +524,19 @@ def resample_returns_without_lead_lag(
         regime_columns = ("null_regime_all",)
 
     rng = np.random.default_rng(random_seed)
-    simulated = pivot.copy()
     audit_rows: list[dict[str, object]] = []
-    for target in dates.itertuples(index=False):
+    donor_pools: dict[tuple[object, ...], list[int]] = {}
+    donor_indices: list[int] = []
+    for target_index, target in enumerate(dates.itertuples(index=False)):
         target_date = target.date
-        eligible = dates.loc[dates["date"].le(target_date)]
-        for column in regime_columns:
-            eligible = eligible.loc[eligible[column].eq(getattr(target, column))]
-        if eligible.empty:
-            raise RuntimeError("causal regime resampling found no donor date")
-        donor_date = eligible.iloc[int(rng.integers(0, len(eligible)))]["date"]
-        simulated.loc[target_date] = common.loc[target_date] + residuals.loc[donor_date]
+        regime_key = tuple(getattr(target, column) for column in regime_columns)
+        pool = donor_pools.setdefault(regime_key, [])
+        # Adding the target before drawing exactly implements donor_date <=
+        # target_date while avoiding a full DataFrame filter for every date.
+        pool.append(target_index)
+        donor_index = pool[int(rng.integers(0, len(pool)))]
+        donor_indices.append(donor_index)
+        donor_date = dates.iloc[donor_index]["date"]
         audit_rows.append(
             {
                 "target_date": target_date,
@@ -517,6 +549,11 @@ def resample_returns_without_lead_lag(
                 },
             }
         )
+    simulated = pd.DataFrame(
+        common.to_numpy()[:, None] + residuals.to_numpy()[donor_indices],
+        index=pivot.index,
+        columns=pivot.columns,
+    )
     long = simulated.rename_axis(columns="security_id").reset_index().melt(
         id_vars="date", var_name="security_id", value_name=return_column
     )
@@ -541,6 +578,12 @@ def _build_detection_input(
         peer_membership,
         abnormal_return_column=return_column,
     )
+    # A simulated donor vector can carry the frozen panel's listing/calendar
+    # missingness onto a target date. Such rows are not observable event
+    # candidates and must be removed before the strict detector validation,
+    # exactly as unavailable observed returns are absent from the production
+    # relative-return panel.
+    relative = relative.loc[relative["relative_abnormal_return"].notna()].copy()
     keys = ["date", "security_id", "peer_definition"]
     _require_columns(
         detection_metadata,
@@ -792,11 +835,15 @@ def _summarize_method(
             values = frame[outcome].dropna()
             if iteration_column:
                 estimates = frame.groupby(iteration_column)[outcome].mean().dropna().to_numpy(float)
+                reported_sample_size = int(
+                    round(frame.groupby(iteration_column)[outcome].count().mean())
+                )
             else:
                 estimates_frame = bootstrap.loc[bootstrap["outcome"].eq(outcome)]
                 for column, value in base.items():
                     estimates_frame = estimates_frame.loc[estimates_frame[column].eq(value)]
                 estimates = estimates_frame["statistic"].dropna().to_numpy(float)
+                reported_sample_size = int(len(values))
             alpha = 1 - confidence_level
             lower, upper = (
                 np.quantile(estimates, [alpha / 2, 1 - alpha / 2])
@@ -812,7 +859,7 @@ def _summarize_method(
                     "mean": float(values.mean()) if len(values) else np.nan,
                     "ci_lower": float(lower),
                     "ci_upper": float(upper),
-                    "sample_size": int(len(values)),
+                    "sample_size": reported_sample_size,
                     "experiment_iterations": int(len(estimates)),
                 }
             )

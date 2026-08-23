@@ -1,0 +1,11 @@
+check,passed
+frozen_baseline_inputs_match_manifest,True
+event_detection_uses_shifted_trailing_volatility,True
+alternative_peers_strictly_pre_event,True
+one_at_a_time_specifications,True
+baseline_three_sigma_present,True
+all_requested_horizons_reported,True
+market_benchmark_unavailability_retained,True
+market_cap_unavailability_retained,True
+sample_sizes_reported,True
+weak_and_unavailable_results_retained,True
