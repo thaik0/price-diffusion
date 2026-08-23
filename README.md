@@ -277,6 +277,21 @@ diagnostics = result.diagnostics
 These outputs are descriptive only. Stage 8 does not perform significance
 tests or support causal claims about information diffusion.
 
+## Frozen empirical baseline
+
+Stage 12 assembles the missing peer, relative-return, event, and event-panel
+datasets from the Stage 11D artifacts, runs the frozen 2015--2025 study, and
+writes the baseline tables, figures, and run manifest under `outputs/baseline/`.
+The production peer groups copy the final manually reviewed Stage 11A
+subsectors; the older peer-classification CSV remains a Stage 5 smoke-test seed.
+
+```bash
+python -m price_diffusion.baseline
+```
+
+The human research workflow is `notebooks/05_baseline_event_study.ipynb`, while
+all transformations and calculations remain in `src/price_diffusion/`.
+
 ## Statistical inference
 
 Stage 9 measures uncertainty around detected-event outcomes without changing

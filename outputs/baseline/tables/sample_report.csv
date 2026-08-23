@@ -1,0 +1,6 @@
+metric,value
+total_classified_securities,54
+baseline_eligible_securities,36
+excluded_securities,18
+eligible_on_final_global_calendar_date,29
+sample_end,2025-12-31

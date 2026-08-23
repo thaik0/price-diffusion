@@ -1,0 +1,82 @@
+{
+  "classified_security_count": 54,
+  "distribution_figure_horizon": 5,
+  "event_count": 242,
+  "event_definition": {
+    "cooldown_period": 5,
+    "cooldown_scope": "both",
+    "exclude_corporate_action_types": [
+      "split",
+      "merger",
+      "abnormal_price_adjustment",
+      "unknown"
+    ],
+    "minimum_history_requirement": 60,
+    "minimum_peer_count": 3,
+    "minimum_relative_move": 0.05,
+    "threshold_multiplier": 3.0,
+    "volatility_window": 60
+  },
+  "ever_baseline_eligible_security_count": 36,
+  "horizons": [
+    1,
+    3,
+    5,
+    10
+  ],
+  "input_sha256": {
+    "config": "9a595f7506a76617d1bd7502e5b36731034039ad135a38ea88ccb6fbb15257a7",
+    "daily_panel": "e59711f9873d2728601451a1e4781b633e6893e7268fcfbbfb0e149ca1e8a08d",
+    "security_master": "0a82ce167a0b624ca9ae223b947f62b13fd1e4eb34cdf0a90a3a1bc7dfe828d1",
+    "semiconductor_classification": "e9dec9831953c0ec0a84419ad035e13944cfd6ff978d08a61f185ac0a3e3984c",
+    "universe_membership": "1d774818057549453e5ad69870615db530f24c3817fd32a455d761ed096e5ddd"
+  },
+  "interpretation": "At 5 trading days, the point estimates are descriptively consistent with both delayed peer adjustment and initiator reversal (mean convergence 0.0038). The confidence interval includes zero, so the estimate is imprecise. This conditional event-study pattern is not causal evidence.",
+  "limitations": [
+    "The present-day reviewed classification is applied retrospectively.",
+    "The universe is not survivorship-free.",
+    "Yahoo adjusted prices are revisable and corporate-action metadata are incomplete.",
+    "International closes are non-synchronous and returns remain in local listing currencies.",
+    "Confidence intervals condition on detected events and do not establish causality."
+  ],
+  "negative_event_count": 102,
+  "output_sha256": {
+    "figures/convergence_components.png": "62db2ee0dc2114858be0d43cb388cd7107d34b8d8f3c2fbc996e2385fbdb0aca",
+    "figures/event_path.png": "677ca4e4eed2233dae1b098dcad01066672b2956b104619620fd695f3ee26d58",
+    "figures/outcome_distributions.png": "6826a7ecd7b707642a7547a48483983285dc18a21f851fd4821ca55cbc815d7b",
+    "tables/attrition.csv": "a3f561a2449822babffaeed5760ac00b511447ffbc89f4f16c7b55e9f71418e0",
+    "tables/company_concentration.csv": "c12730b37509cc4d0ededfeae129cf057c58249442d60abb40daca5c1c14daba",
+    "tables/date_concentration.csv": "8214ded2aced6e33e306f8a0c0589ab01525f462e34ee718dfcdf19cfcf37f64",
+    "tables/distribution_statistics.csv": "60e48f8e8c0ea68a52ffe0621f546eb10adc514937e2fbc639b9600094dab2ab",
+    "tables/event_path_statistics.csv": "ede4ee5891ab4de659953b2b9c4e44ee5b16ca622a3f1b73c2ab5a3035e30c8c",
+    "tables/event_summary.csv": "0c41843c8377137ea3304836d2d8a5e6fc9976a640a97320865c8fa2d1bb8fe9",
+    "tables/excluded_securities.csv": "fa5b023d4094f9598979ce43fcb3ae80d6d499b63d999e6478b2d81fdc3fd530",
+    "tables/exclusion_reason_summary.csv": "2ccb901ca73bc8ff8a58f0e5a9c7795477b3f4d667a64a93cb3e4ce635653080",
+    "tables/horizon_missingness.csv": "7ddfd3826c04f05a81adf6102133b6155ffb4888c6b1735e7b4f3143054b67c7",
+    "tables/hypothesis_tests.csv": "ca2182d5f9b91d71bb15d62a3ef648599f24d81a8042ab0221bb4e68a45a151f",
+    "tables/mechanism_decomposition.csv": "b36c470792a8747e2a7338f0a39006ea86e550acd0cffaf410466cdc5234f7b6",
+    "tables/missingness_reasons.csv": "1be4b4e4db497a0dd43ae1440ea67c5a99a99a707ed7a8fc6b3d238c51e28395",
+    "tables/outcome_summary.csv": "bfd76e9a8182c75b5dbbc3b7b1194c2e10203822e0c50029c3710dcd4af4d70d",
+    "tables/sample_report.csv": "9ca7394303111a7d28ffbff082b20cf17d9f6943150cec6cc7d29213473287e1",
+    "tables/security_sample.csv": "cbb1cb5b96757fae3fcf8432a50f5282a00c3e189eea4ddd3d41ea6897f0793b",
+    "tables/short_history_exclusions.csv": "85e54fdf0e4928babb4328f586cedafdf66b32d39b2c3ef60d0f8d4b900826ec",
+    "tables/subsector_summary.csv": "bab885763e2ed45f50423680091198e1fc0f6fa2aee4f32584994679303c53c8"
+  },
+  "peer_methodology": "equal-weight leave-one-out reviewed Stage 11A subsector peers",
+  "positive_event_count": 140,
+  "return_specification": "semiconductor_adjusted_return",
+  "run_timestamp_utc": "2026-08-23T00:41:43.181743+00:00",
+  "sample_end": "2025-12-31",
+  "sample_start": "2015-01-01",
+  "semiconductor_factor": "same-day equal-weight return of baseline-eligible securities",
+  "stage": 12,
+  "universe_version": "semiconductor_universe_2026_08_22_v1",
+  "validations": {
+    "convergence_identity_valid": true,
+    "event_dates_within_frozen_sample": true,
+    "no_self_peers": true,
+    "point_in_time_eligible_peer_endpoints": true,
+    "sign_normalization_valid": true,
+    "strictly_trailing_event_volatility": true
+  }
+}

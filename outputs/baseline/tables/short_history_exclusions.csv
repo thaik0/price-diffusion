@@ -1,0 +1,4 @@
+security_id,ticker,first_trading_date,last_trading_date,number_of_observations,issues
+SEC_688825_SS,688825.SS,2026-07-27,2026-08-21,20,insufficient_history_for_factor_models; short_history_company; recent_ipo_proxy
+SEC_CBRS,CBRS,2026-05-14,2026-08-21,69,insufficient_history_for_factor_models; short_history_company; recent_ipo_proxy
+SEC_Q,Q,2025-10-27,2026-08-21,206,insufficient_history_for_factor_models; short_history_company; recent_ipo_proxy

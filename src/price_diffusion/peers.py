@@ -40,6 +40,25 @@ PRIMARY_SUBSECTORS = frozenset(
     }
 )
 
+# Stage 11A replaced the small Stage 5 smoke-test taxonomy with the reviewed
+# production taxonomy.  Keep ``PRIMARY_SUBSECTORS`` stable for the bundled
+# Stage 5 fixture while allowing the production labels through the same peer
+# construction contract.
+PRODUCTION_SUBSECTORS = frozenset(
+    {
+        "analog_mixed_signal",
+        "eda_ip",
+        "fabless_compute",
+        "fabless_mobile_connectivity",
+        "foundry",
+        "integrated_device_manufacturer",
+        "memory",
+        "packaging_testing",
+        "semiconductor_equipment",
+        "semiconductor_materials",
+    }
+)
+
 CandidateBuilder = Callable[[pd.DataFrame, pd.DataFrame], pd.DataFrame]
 
 
@@ -107,7 +126,8 @@ def _validate_classification_coverage(
 
 
 def _validate_subsectors(peer_classification: pd.DataFrame) -> None:
-    unknown = sorted(set(peer_classification["subsector"]) - PRIMARY_SUBSECTORS)
+    supported = PRIMARY_SUBSECTORS | PRODUCTION_SUBSECTORS
+    unknown = sorted(set(peer_classification["subsector"]) - supported)
     if unknown:
         raise DataValidationError(
             [

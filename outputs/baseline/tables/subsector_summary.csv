@@ -1,0 +1,11 @@
+subsector,event_count,positive_shocks,negative_shocks,initiating_companies,classified_securities
+analog_mixed_signal,109,64,45,8,10
+eda_ip,0,0,0,0,3
+fabless_compute,42,19,23,4,7
+fabless_mobile_connectivity,0,0,0,0,2
+foundry,29,18,11,4,6
+integrated_device_manufacturer,0,0,0,0,1
+memory,0,0,0,0,5
+packaging_testing,0,0,0,0,5
+semiconductor_equipment,62,39,23,5,9
+semiconductor_materials,0,0,0,0,6

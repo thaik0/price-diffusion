@@ -1,0 +1,55 @@
+security_id,ticker,company_name,subsector,universe_tier,ever_baseline_eligible,eligible,exclusion_reason,baseline_exclusion_reason
+SEC_000660_KS,000660.KS,SK hynix Inc.,memory,core,True,False,missing_data;no_market_data,
+SEC_002371_SZ,002371.SZ,NAURA Technology Group Co. Ltd.,semiconductor_equipment,extension,False,False,universe_tier_not_allowed,universe_tier_not_allowed
+SEC_0981_HK,0981.HK,Semiconductor Manufacturing International Corporation,foundry,extension,False,False,universe_tier_not_allowed,universe_tier_not_allowed
+SEC_1347_HK,1347.HK,Hua Hong Semiconductor Limited,foundry,extension,False,False,universe_tier_not_allowed,universe_tier_not_allowed
+SEC_2454_TW,2454.TW,MediaTek Inc.,fabless_mobile_connectivity,core,True,True,,
+SEC_285A_T,285A.T,Kioxia Holdings Corporation,memory,core,True,False,missing_data;no_market_data,
+SEC_3436_T,3436.T,SUMCO Corporation,semiconductor_materials,extension,False,False,universe_tier_not_allowed;missing_data;no_market_data,universe_tier_not_allowed
+SEC_3443_TW,3443.TW,Global Unichip Corporation,fabless_compute,extension,False,False,universe_tier_not_allowed,universe_tier_not_allowed
+SEC_4063_T,4063.T,Shin-Etsu Chemical Co. Ltd.,semiconductor_materials,extension,False,False,universe_tier_not_allowed;missing_data;no_market_data,universe_tier_not_allowed
+SEC_603986_SS,603986.SS,GigaDevice Semiconductor Inc.,memory,extension,False,False,universe_tier_not_allowed,universe_tier_not_allowed
+SEC_6146_T,6146.T,DISCO Corporation,semiconductor_equipment,core,True,False,missing_data;no_market_data,
+SEC_6723_T,6723.T,Renesas Electronics Corporation,analog_mixed_signal,core,True,False,missing_data;no_market_data,
+SEC_6857_T,6857.T,Advantest Corporation,packaging_testing,core,True,False,missing_data;no_market_data,
+SEC_688012_SS,688012.SS,Advanced Micro-Fabrication Equipment Inc. China,semiconductor_equipment,extension,False,False,universe_tier_not_allowed,universe_tier_not_allowed
+SEC_688256_SS,688256.SS,Cambricon Technologies Corporation Limited,fabless_compute,extension,False,False,universe_tier_not_allowed,universe_tier_not_allowed
+SEC_688825_SS,688825.SS,CXMT Corporation,memory,extension,False,False,universe_tier_not_allowed;missing_data;no_market_data,universe_tier_not_allowed;insufficient_history
+SEC_6963_T,6963.T,ROHM Co. Ltd.,analog_mixed_signal,extension,False,False,universe_tier_not_allowed;missing_data;no_market_data,universe_tier_not_allowed
+SEC_8035_T,8035.T,Tokyo Electron Limited,semiconductor_equipment,core,True,False,missing_data;no_market_data,
+SEC_ADI,ADI,Analog Devices Inc.,analog_mixed_signal,core,True,True,,
+SEC_AMAT,AMAT,Applied Materials Inc.,semiconductor_equipment,core,True,True,,
+SEC_AMD,AMD,Advanced Micro Devices Inc.,fabless_compute,core,True,True,,
+SEC_AMKR,AMKR,Amkor Technology Inc.,packaging_testing,core,True,True,,
+SEC_ARM,ARM,Arm Holdings plc,eda_ip,core,True,True,,
+SEC_ASM,ASM,ASM International N.V.,semiconductor_equipment,core,True,True,,
+SEC_ASML,ASML,ASML Holding N.V.,semiconductor_equipment,core,True,True,,
+SEC_ASX,ASX,ASE Technology Holding Co. Ltd.,packaging_testing,core,True,True,,
+SEC_CBRS,CBRS,Cerebras Systems Inc.,fabless_compute,extension,False,False,universe_tier_not_allowed;missing_data;no_market_data,universe_tier_not_allowed;insufficient_history
+SEC_CDNS,CDNS,Cadence Design Systems Inc.,eda_ip,core,True,True,,
+SEC_COHR,COHR,Coherent Corp.,semiconductor_materials,extension,False,False,universe_tier_not_allowed,universe_tier_not_allowed
+SEC_CRDO,CRDO,Credo Technology Group Holding Ltd.,fabless_compute,core,True,True,,
+SEC_ENTG,ENTG,Entegris Inc.,semiconductor_materials,extension,False,False,universe_tier_not_allowed,universe_tier_not_allowed
+SEC_FORM,FORM,FormFactor Inc.,packaging_testing,extension,False,False,universe_tier_not_allowed,universe_tier_not_allowed
+SEC_GFS,GFS,GlobalFoundries Inc.,foundry,core,True,True,,
+SEC_IFX_DE,IFX.DE,Infineon Technologies AG,analog_mixed_signal,core,True,False,missing_data;no_market_data,
+SEC_INTC,INTC,Intel Corporation,integrated_device_manufacturer,core,True,True,,
+SEC_KLAC,KLAC,KLA Corporation,semiconductor_equipment,core,True,True,,
+SEC_LRCX,LRCX,Lam Research Corporation,semiconductor_equipment,core,True,True,,
+SEC_MCHP,MCHP,Microchip Technology Incorporated,analog_mixed_signal,core,True,True,,
+SEC_MPWR,MPWR,Monolithic Power Systems Inc.,analog_mixed_signal,core,True,True,,
+SEC_MRVL,MRVL,Marvell Technology Inc.,fabless_compute,core,True,True,,
+SEC_MU,MU,Micron Technology Inc.,memory,core,True,True,,
+SEC_NVDA,NVDA,NVIDIA Corporation,fabless_compute,core,True,True,,
+SEC_NXPI,NXPI,NXP Semiconductors N.V.,analog_mixed_signal,core,True,True,,
+SEC_ON,ON,onsemi,analog_mixed_signal,core,True,True,,
+SEC_Q,Q,Qnity Electronics Inc.,semiconductor_materials,extension,False,False,universe_tier_not_allowed;insufficient_history,universe_tier_not_allowed;insufficient_history
+SEC_QCOM,QCOM,QUALCOMM Incorporated,fabless_mobile_connectivity,core,True,True,,
+SEC_SNPS,SNPS,Synopsys Inc.,eda_ip,core,True,True,,
+SEC_SOI_PA,SOI.PA,Soitec S.A.,semiconductor_materials,extension,False,False,universe_tier_not_allowed,universe_tier_not_allowed
+SEC_STM,STM,STMicroelectronics N.V.,analog_mixed_signal,core,True,True,,
+SEC_TPRO_MI,TPRO.MI,Technoprobe S.p.A.,packaging_testing,extension,False,False,universe_tier_not_allowed;missing_data;no_market_data,universe_tier_not_allowed
+SEC_TSEM,TSEM,Tower Semiconductor Ltd.,foundry,core,True,True,,
+SEC_TSM,TSM,Taiwan Semiconductor Manufacturing Company Limited,foundry,core,True,True,,
+SEC_TXN,TXN,Texas Instruments Incorporated,analog_mixed_signal,core,True,True,,
+SEC_UMC,UMC,United Microelectronics Corporation,foundry,core,True,True,,

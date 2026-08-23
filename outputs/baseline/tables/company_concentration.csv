@@ -1,0 +1,22 @@
+security_id,event_count,subsector,ticker,company_name,event_share,dominant_company_flag
+SEC_STM,24,analog_mixed_signal,STM,STMicroelectronics N.V.,0.09917355371900827,False
+SEC_MPWR,21,analog_mixed_signal,MPWR,Monolithic Power Systems Inc.,0.08677685950413223,False
+SEC_ON,21,analog_mixed_signal,ON,onsemi,0.08677685950413223,False
+SEC_AMAT,18,semiconductor_equipment,AMAT,Applied Materials Inc.,0.0743801652892562,False
+SEC_KLAC,16,semiconductor_equipment,KLAC,KLA Corporation,0.06611570247933884,False
+SEC_NXPI,16,analog_mixed_signal,NXPI,NXP Semiconductors N.V.,0.06611570247933884,False
+SEC_LRCX,15,semiconductor_equipment,LRCX,Lam Research Corporation,0.06198347107438017,False
+SEC_MCHP,15,analog_mixed_signal,MCHP,Microchip Technology Incorporated,0.06198347107438017,False
+SEC_AMD,13,fabless_compute,AMD,Advanced Micro Devices Inc.,0.05371900826446281,False
+SEC_ASML,12,semiconductor_equipment,ASML,ASML Holding N.V.,0.049586776859504134,False
+SEC_GFS,11,foundry,GFS,GlobalFoundries Inc.,0.045454545454545456,False
+SEC_NVDA,11,fabless_compute,NVDA,NVIDIA Corporation,0.045454545454545456,False
+SEC_CRDO,9,fabless_compute,CRDO,Credo Technology Group Holding Ltd.,0.0371900826446281,False
+SEC_MRVL,9,fabless_compute,MRVL,Marvell Technology Inc.,0.0371900826446281,False
+SEC_TSEM,9,foundry,TSEM,Tower Semiconductor Ltd.,0.0371900826446281,False
+SEC_ADI,6,analog_mixed_signal,ADI,Analog Devices Inc.,0.024793388429752067,False
+SEC_TXN,5,analog_mixed_signal,TXN,Texas Instruments Incorporated,0.02066115702479339,False
+SEC_UMC,5,foundry,UMC,United Microelectronics Corporation,0.02066115702479339,False
+SEC_TSM,4,foundry,TSM,Taiwan Semiconductor Manufacturing Company Limited,0.01652892561983471,False
+SEC_6146_T,1,semiconductor_equipment,6146.T,DISCO Corporation,0.004132231404958678,False
+SEC_IFX_DE,1,analog_mixed_signal,IFX.DE,Infineon Technologies AG,0.004132231404958678,False
