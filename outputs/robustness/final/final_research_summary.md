@@ -32,12 +32,12 @@ The frozen 2015–2025 Stage 12 sample contains 54 reviewed securities, 36 ever 
 
 ## Null and placebo evidence at five days
 
-| method | mean | ci_lower | ci_upper | sample_size |
-| --- | --- | --- | --- | --- |
-| null_simulation | 0.0002 | -0.0039 | 0.0044 | 82 |
-| observed | 0.0022 | -0.0019 | 0.0059 | 173 |
-| pseudo_events | -0.0002 | -0.0042 | 0.0039 | 165 |
-| random_peers | -0.0001 | -0.0027 | 0.0033 | 173 |
+| method | mean | ci_lower | ci_upper | events_per_iteration | resampling_iterations |
+| --- | --- | --- | --- | --- | --- |
+| null_simulation | 0.0002 | -0.0039 | 0.0044 | 82 | 500 |
+| observed | 0.0022 | -0.0019 | 0.0059 | 173 | 1000 |
+| pseudo_events | -0.0002 | -0.0042 | 0.0039 | 165 | 200 |
+| random_peers | -0.0001 | -0.0027 | 0.0033 | 173 | 200 |
 
 ## Time stability at five days
 

@@ -308,10 +308,8 @@ def run_specification_robustness(
     directory = Path(output_directory)
     directory.mkdir(parents=True, exist_ok=True)
     result_path = directory / "specification_results.csv"
-    summary_path = directory / "specification_summary.csv"
     figure_path = directory / "specification_curve.png"
     results.to_csv(result_path, index=False)
-    summary.to_csv(summary_path, index=False)
     _plot_specification_curve(results, figure_path)
     checks = {
         "frozen_baseline_inputs_match_manifest": _frozen_input_check(inputs),
@@ -337,7 +335,6 @@ def run_specification_robustness(
         {"specification_results": results, "specification_summary": summary},
         {
             "specification_results": result_path,
-            "specification_summary": summary_path,
             "specification_curve": figure_path,
         },
         checks,
@@ -597,14 +594,37 @@ def _bootstrap_summary(distribution: pd.DataFrame) -> pd.DataFrame:
                 "return_specification": keys[2],
                 "peer_definition": keys[3],
                 "outcome": keys[4],
-                "bootstrap_mean": float(values.mean()),
+                "estimate": float(values.mean()),
                 "ci_lower": float(lower),
                 "ci_upper": float(upper),
-                "iterations": int(len(values)),
-                "average_sample_size": float(frame["sample_size"].mean()),
+                "bootstrap_iterations": int(len(values)),
+                "sample_size": float(frame["sample_size"].mean()),
             }
         )
     return pd.DataFrame(rows)
+
+
+def _placebo_report_table(
+    placebo: pd.DataFrame, *, horizon: int, outcome: str
+) -> pd.DataFrame:
+    """Label stored randomized-method counts at their actual granularity."""
+    return placebo.loc[
+        placebo["horizon"].eq(horizon) & placebo["outcome"].eq(outcome)
+    ][
+        [
+            "method",
+            "mean",
+            "ci_lower",
+            "ci_upper",
+            "sample_size",
+            "experiment_iterations",
+        ]
+    ].rename(
+        columns={
+            "sample_size": "events_per_iteration",
+            "experiment_iterations": "resampling_iterations",
+        }
+    )
 
 
 def run_sample_stability(
@@ -801,9 +821,7 @@ def run_final_research_summary(
             },
         ]
     )
-    null5 = placebo.loc[
-        placebo["horizon"].eq(5) & placebo["outcome"].eq("peer_catchup")
-    ][["method", "mean", "ci_lower", "ci_upper", "sample_size"]]
+    null5 = _placebo_report_table(placebo, horizon=5, outcome="peer_catchup")
     spec5 = specification.loc[
         specification["horizon"].eq(5)
         & specification["outcome"].eq("peer_catchup")

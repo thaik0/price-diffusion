@@ -1,4 +1,4 @@
-bootstrap_method,horizon,return_specification,peer_definition,outcome,bootstrap_mean,ci_lower,ci_upper,iterations,average_sample_size
+bootstrap_method,horizon,return_specification,peer_definition,outcome,estimate,ci_lower,ci_upper,bootstrap_iterations,sample_size
 date,1,semiconductor_adjusted_return,economic_subsector_peers,convergence,0.005239914626211836,-0.0005398102251327274,0.01188265545315803,2000,225.9145
 date,1,semiconductor_adjusted_return,economic_subsector_peers,initiator_reversal,0.0026428778375199016,-0.0027749563059618664,0.008568539427278631,2000,225.9145
 date,1,semiconductor_adjusted_return,economic_subsector_peers,peer_catchup,0.0025970367886919343,0.0006059918299428598,0.0047157928215117665,2000,225.9145
