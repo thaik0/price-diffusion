@@ -1,0 +1,10 @@
+check,passed
+sector_characteristics_strictly_pre_event,True
+volume_characteristics_strictly_pre_event,True
+correlation_peers_strictly_pre_event,True
+regressions_report_sample_sizes,True
+small_samples_are_flagged,True
+all_subsectors_disclosed,True
+baseline_event_count_unchanged,True
+frozen_baseline_input_hashes_match,True
+market_volatility_unavailability_disclosed,True
