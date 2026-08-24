@@ -6,8 +6,10 @@ __pycache__/
 build/
 dist/
 .ipynb_checkpoints/
-# Research notes are local working material, not repository artifacts.
-research_notes/
+# Stage notes are local working material; keep the two final reader-facing notes.
+research_notes/*
+!research_notes/final_research_summary.md
+!research_notes/interview_guide.md
 
 # Keep directory markers, but do not version generated or downloaded data.
 data/raw/*

@@ -1,220 +1,98 @@
 # Semiconductor Information Diffusion and Relative Price Discovery
 
-This repository provides the reproducible research foundation for studying how
-information is incorporated into semiconductor equity prices and how price
-discovery propagates across economically related firms.
+I study what happens after one semiconductor stock moves unusually far from economically related peers. Do those peers catch up, does the initiating stock reverse, or does the gap simply remain?
 
-## Current status
+## Research question
 
-Stage 10 adds random-peer and matched pseudo-event placebos, a causal
-regime-stratified selection-preserving return null, reversed-time falsification,
-and firm/date block bootstraps. Every experiment reuses the pre-specified Stage 7
-event detector and Stage 8 outcome engine rather than changing thresholds or
-horizons after observing results. See `research_notes/stage_10_null_models.md`
-for assumptions, interpretation, and limitations.
+Semiconductor firms share customers, suppliers, technology cycles, and exposure to capital spending. A large move in one company may therefore contain information that matters for other firms, even when those firms do not react at the same time.
 
-## Design philosophy
+I treat the initial mover as the **initiator** and compare it with a leave-one-out portfolio of peers. For a positive or negative event with direction \(s \in \{+1,-1\}\), the post-event gap closure is
 
-- **Research correctness:** assumptions and experiment parameters live in
-  version-controlled configuration rather than being hidden in notebooks.
-- **Reproducibility:** experiments should start from an explicit configuration
-  and random seed, and write artifacts to stable output directories.
-- **Simplicity:** use small functions and the standard scientific Python stack;
-  add abstractions only when repeated research work justifies them.
-- **Separation of concerns:** reusable and testable logic belongs in `src/`,
-  while notebooks are for exploration, diagnostics, and presentation.
-- **Data provenance:** `data/raw/` is reserved for immutable source data;
-  transformations should progress through `interim/` to `processed/`.
+\[
+\text{convergence} = \underbrace{s \times \text{peer CAR}}_{\text{peer catch-up}} + \underbrace{(-s) \times \text{initiator CAR}}_{\text{initiator reversal}}.
+\]
 
-The values in `configs/baseline.yaml` are placeholders for the first empirical
-design. They are not validated research choices and should be revised before an
-experiment is interpreted.
+A positive peer-catch-up value means peers moved in the direction of the original shock. A positive initiator-reversal value means the initiating stock moved back. This decomposition matters because the same convergence estimate can come from two different economic stories.
 
-## Core data contracts
+## What I found
 
-Contracts are defined in `src/price_diffusion/data_contracts.py`; fail-closed,
-non-mutating validation is implemented in `src/price_diffusion/validation.py`.
-Extra source columns may be retained, but every required field must satisfy its
-logical type, nullability rule, and dataset key.
+The unconditional result was weak. Across 173 events with complete five-day outcomes, mean convergence was **+0.38%** and peer catch-up was **+0.22%**, but both confidence intervals included zero. Ten-day convergence was slightly negative. The baseline does not establish a general diffusion effect.
 
-| Dataset | Required fields | Primary key |
-| --- | --- | --- |
-| `security_master` | `security_id`, `ticker`, `company_name`, `exchange`, `security_type`, `sector`, `sub_industry` | `security_id` |
-| `semiconductor_classification` | `security_id`, `ticker`, `company_name`, `subsector`, `classification_notes` | `security_id` |
-| `peer_classification` | `security_id`, `subsector`, `peer_group`, `classification_notes` | `security_id` |
-| `universe_membership` | `date`, `security_id`, `eligible`, `exclusion_reason` | `date`, `security_id` |
-| `daily_panel` | `date`, `security_id`, `adjusted_close`, `close`, `volume`, `return` | `date`, `security_id` |
-| `peer_membership` | `date`, `security_id`, `peer_id`, `weight`, `peer_definition` | `date`, `security_id`, `peer_id`, `peer_definition` |
-| `relative_returns` | `date`, `security_id`, `peer_definition`, `stock_return`, `peer_return`, `relative_return`, `market_adjusted_return`, `semiconductor_adjusted_return` | `date`, `security_id`, `peer_definition` |
-| `events` | `event_id`, `date`, `security_id`, `direction`, `relative_return`, `relative_volatility`, `threshold_used`, `peer_definition`, `subsector`, metadata flags | `event_id` |
+The clearest result appeared when I changed how peers were defined. On the same 131 five-day events, economic peers had **+0.34%** mean catch-up, while peers chosen from trailing return correlations had **−0.27%**. The paired economic-minus-correlation difference was:
 
-### Event detection
+> **+0.61% over five trading days**
+>
+> **95% paired-bootstrap CI: +0.16% to +1.05%; n = 131**
 
-Stage 7 applies `abs(relative_abnormal_return) > max(minimum_relative_move,
-threshold_multiplier * trailing_volatility)`. The rolling volatility input is
-shifted before estimation, so neither the event-date shock nor future returns
-can affect its threshold. Event parameters live under `event_thresholds` in the
-baseline configuration.
+That is a relative result, not proof of absolute diffusion. A selection-preserving simulation redetected extreme events inside simulated returns and reran the study. At five days, the empirical p-values were about **0.17 for peer catch-up** and **0.13 for convergence**. The observed estimates were above the average null draw, but not unusually extreme under that benchmark.
 
-```python
-from price_diffusion.config import load_config
-from price_diffusion.events import detect_events
+Other results were secondary. Equipment-company events had +0.80% mean five-day peer catch-up, but −0.49% initiator reversal reduced total convergence to +0.31%. Lower prior semiconductor momentum was directionally associated with more convergence, although the result changed with the horizon. A pre-specified squared-shock test did not support nonlinear shock-magnitude effects, and the absolute catch-up estimate was not uniform across time periods.
 
-events = detect_events(relative_abnormal_returns, load_config())
-```
+## Why the result is interesting
 
-The input supplies dated `peer_count`, `peer_group`, `subsector`, and an explicit
-`corporate_action_type` classification alongside the Stage 6 relative abnormal
-return. Optional earnings and news flags are metadata only. See
-`research_notes/stage_07_event_detection.md` for the design rationale and
-limitations.
+Historical return correlation and economic relatedness are not the same thing. A correlation screen selects stocks whose returns happened to move together over a trailing window. An economic classification instead groups firms that occupy similar parts of the semiconductor value chain and may share demand, customers, input costs, or capital-spending exposure.
 
-### Relative-return measurement
+The result is therefore more specific than “semiconductor stocks move together.” For the same events, reviewed economic relationships contained incremental information about short-horizon cross-firm adjustment beyond the fixed trailing-correlation alternative. The comparison is paired and uses only pre-event information for correlation peers. It still does not show that an economic link caused the adjustment; common news, market timing, classification error, and omitted exposures remain possible explanations.
 
-Stage 6 joins returns to peer membership by date, excludes the focal company,
-and renormalizes weights over peers with observed returns. Configurable market
-and semiconductor factor series are also joined by date; absent factor dates
-remain missing rather than becoming zero returns. The rolling factor interface
-uses observations strictly before each prediction date and retains its fitted
-coefficients and estimation boundaries.
+## Methodology
 
-```python
-from price_diffusion.returns import build_relative_returns
+I manually reviewed a semiconductor universe and assigned firms to an economic peer taxonomy. Eligibility is dated and uses only information available through each date for price, history, and liquidity screens, although the current classification itself had to be applied retrospectively. Daily prices and volumes come from Yahoo Finance for 2015–2025.
 
-relative_returns = build_relative_returns(
-    daily_panel,
-    peer_membership,
-    market_returns,
-    semiconductor_factor_returns,
-    market_return_column="market_return",
-    semiconductor_return_column="semiconductor_return",
-)
-```
+The event signal is the initiator's return relative to an equal-weight, leave-one-out peer portfolio, after removing the same-day equal-weight semiconductor-sector return. An event requires an absolute relative move greater than both **5%** and **three times** shifted trailing 60-observation volatility. The detector also requires 60 prior observations, at least three eligible peers, and a five-day cooldown.
 
-Relative abnormal returns are exposed as a separate transformation so the
-researcher can explicitly choose which abnormal-return model is being compared.
-See `research_notes/stage_06_relative_returns.md` for assumptions and limits.
+I measure peer catch-up, initiator reversal, and their sum over 1, 3, 5, and 10 trading days. Peer portfolios are frozen on the event date. Inference includes firm-clustered intervals, event/firm/date-block bootstraps, and a 10,000-draw paired bootstrap for the economic-versus-correlation comparison. Random-peer and matched pseudo-event placebos test peer identity and event timing. The stricter null preserves selection by simulating returns, redetecting extreme events, and then rebuilding outcomes instead of treating the observed event set as fixed.
 
-Dates must be timezone-naive pandas datetimes normalized to midnight. Strings
-are not silently parsed. Identifiers and metadata strings must be populated,
-prices must be positive, volume must be non-negative, and numeric observations
-must be finite. `return` is the sole nullable core field because the first
-observation for a security may not have a prior price.
+## Research process
 
-Universe and panel identifiers must resolve to the security master. Peer edges
-are directed, may not point to the source security, and both endpoints must
-resolve to the master. Within each `(date, security_id, peer_definition)` group,
-non-negative weights must sum to one.
+1. I froze a baseline event definition and found weak unconditional convergence.
+2. I checked whether the result varied by subsector, event characteristics, and peer definition.
+3. Economic peers looked more informative than correlation-selected or broad semiconductor peers.
+4. I tested that comparison on identical events with strictly trailing correlation inputs and a paired bootstrap.
+5. I then tried to disprove the result with alternative thresholds, horizons, return definitions, universes, placebos, dependence-aware bootstraps, time splits, and a selection-preserving null.
 
-### Universe construction
+The relative peer-definition result survived most clearly. The broader claim that semiconductor shocks generally diffuse to peers did not.
 
-The Stage 4 builder evaluates every security-master identifier on every market
-date, including unavailable securities, and records all failed eligibility
-rules. Thresholds and allowed exchanges and instrument types are stored under
-`universe` in `configs/baseline.yaml`. History and average dollar volume use
-only observations through the membership date.
+## Key figures
 
-```python
-from price_diffusion.config import load_config
-from price_diffusion.universe import build_universe_membership
+![Baseline event path](outputs/baseline/figures/event_path.png)
 
-universe_membership = build_universe_membership(
-    security_master,
-    daily_panel,
-    semiconductor_classification,
-    load_config(),
-)
-```
+**Baseline event path.** Day 0 is the selected initiator shock. Average post-event gap closure is small relative to the initial divergence, and the uncertainty bands widen with the horizon; this is a visual reason not to describe the baseline as strong convergence.
 
-The bundled classification is a current seed snapshot for human review. Its
-configured as-of date blocks silent historical reuse by default. A retrospective
-override must be explicit and does not make the data survivorship-free. See
-`research_notes/stage_04_universe_construction.md` for the design and limitations.
+![Economic and statistical peer comparison](outputs/mechanism_analysis/figures/peer_definition_comparison.png)
 
-### Peer construction
+**Peer definitions on the common five-day sample.** Economic peers have positive mean catch-up while trailing-correlation peers have negative mean catch-up. The plotted intervals describe each level; the more informative paired economic-minus-correlation contrast is +0.61% (95% bootstrap CI +0.16% to +1.05%; n=131).
 
-Peer construction first restricts both relationship endpoints to securities
-eligible on the same date. `economic_subsector_peers` then matches the narrower
-reviewed `peer_group` label and equal-weights the remaining non-self peers.
-`broad_semiconductor_peers` includes every other eligible semiconductor.
+![Selection-preserving null distribution](outputs/robustness/nulls/observed_vs_null_distribution.png)
 
-```python
-from price_diffusion.peers import (
-    BROAD_SEMICONDUCTOR_PEERS,
-    ECONOMIC_SUBSECTOR_PEERS,
-    build_peer_membership,
-)
+**Observed five-day peer catch-up against the selection-preserving null.** The observed +0.22% lies above the null mean, but only at the 83rd percentile (empirical p≈0.17). Extreme-event selection can produce apparent mean reversion, so this is an important limit on the absolute claim.
 
-peer_membership = build_peer_membership(
-    security_master,
-    semiconductor_classification,
-    universe_membership,
-    peer_classification,
-    definitions=(ECONOMIC_SUBSECTOR_PEERS, BROAD_SEMICONDUCTOR_PEERS),
-)
-```
+![Equipment convergence decomposition](outputs/mechanism_analysis/figures/equipment_convergence_decomposition.png)
 
-The output is directed and dated, and weights sum to one within each non-empty
-source/date/definition portfolio. The architecture reserves a trailing-return
-similarity definition, but Stage 5 intentionally does not implement it. See
-`research_notes/stage_05_peer_construction.md` for rationale and limitations.
+**Equipment events, decomposed.** Peers catch up by about +0.80% over five days, but the initiator continues in the shock direction on average, producing −0.49% initiator reversal. The offset leaves total convergence small and imprecise.
 
-### Why point-in-time data matters
+## Limitations
 
-Universe eligibility and peer membership are dated facts rather than permanent
-security attributes. Replacing historical membership with today's universe or
-today's peer set would introduce survivorship and look-ahead bias: the research
-would use information that was unavailable on the date being studied. Keeping
-the date in each key forces downstream joins to state which historical snapshot
-they use and allows changes in listings, eligibility, and economic relationships
-to be represented without rewriting history.
+- Yahoo Finance is useful for exploratory daily research but is not an institutional point-in-time market database; adjusted histories can be revised.
+- The economic classifications were manually reconstructed and applied retrospectively. The universe is not survivorship-free and has incomplete histories for delisted, acquired, renamed, and newly listed firms.
+- International listings have different closing times, holidays, currencies, and information sets. A shared calendar date does not guarantee that one market could observe another market's close.
+- I do not have complete event-level earnings or news classifications, so I cannot reliably separate firm-specific news from common semiconductor news.
+- The frozen baseline has no broad-market benchmark. The sector adjustment is documented, but it is not a substitute for a full market model.
+- Some subsectors and long-horizon common samples are small. Complete events fall from 226 at one day to 114 at ten days, and repeated firms and overlapping windows create dependence.
+- This is an observational daily event study. It cannot establish causal information transmission, identify intraday leadership, or support a claim of tradable profits.
 
-### Market-data boundary
+## Repository structure
 
-Source adapters write immutable vendor responses to `data/raw/`; the Stage 3
-pipeline standardizes identifiers and dates, calculates adjusted-close simple
-returns, and validates the result before it is promoted to `data/processed/`.
-CSV is the first adapter, behind an interface intended for future API or vendor
-implementations. For validation of all four research frames, call:
+- `src/price_diffusion/` — tested data, event-study, inference, mechanism, and robustness code.
+- `notebooks/` — the research record, from data audits through the final synthesis.
+- `metadata/` — reviewed security master and semiconductor classifications.
+- `configs/` — frozen sample, eligibility, event, and inference choices; `final_baseline.yaml` is the empirical configuration.
+- `outputs/` — compact tables, figures, diagnostics, and run manifests retained as evidence.
 
-```python
-from price_diffusion.validation import validate_research_data
+The detailed final memo is in [`research_notes/final_research_summary.md`](research_notes/final_research_summary.md), and the concise hypothesis record is [`outputs/robustness/final/evidence_table.csv`](outputs/robustness/final/evidence_table.csv).
 
-validate_research_data(
-    security_master=security_master,
-    universe_membership=universe_membership,
-    daily_panel=daily_panel,
-    peer_membership=peer_membership,
-)
-```
+## Reproducing the analysis
 
-Validation is a gate, not a repair step. An adapter must explicitly resolve a
-bad type, missing identifier, duplicate key, invalid value, or malformed peer
-group and record the transformation in provenance metadata. Deterministic
-synthetic examples are available from
-`price_diffusion.synthetic.make_synthetic_research_data` for adapter and
-pipeline tests that must not use external data.
-
-Construct a daily panel from CSV with:
-
-```python
-from price_diffusion.market_data import CSVMarketDataSource, ingest_market_data
-
-source = CSVMarketDataSource(
-    "data/raw/vendor_prices.csv",
-    column_map={"Symbol": "ticker", "Adj Close": "adjusted_close"},
-)
-daily_panel = ingest_market_data(source, security_master)
-```
-
-Raw canonical columns are `date`, `ticker`, `adjusted_close`, `close`, and
-`volume`. Missing rows remain gaps: returns compare each security's consecutive
-available observations and do not invent calendar-day records.
-
-## Setup
-
-Create and activate a virtual environment, then install the project in editable
-mode with its test dependencies:
+Create an environment from the repository root:
 
 ```bash
 python -m venv .venv
@@ -223,122 +101,17 @@ python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
 ```
 
-Run the tests from the repository root:
+The raw and processed price files are intentionally excluded from Git. To acquire a new immutable Yahoo snapshot, open `notebooks/00_data_acquisition_audit.ipynb`, review the security mapping, and deliberately set `RUN_DOWNLOAD = True`. Then build the audited panel and frozen baseline:
 
 ```bash
-python -m pytest
-```
-
-Load the baseline configuration from Python:
-
-```python
-from price_diffusion.config import load_config
-
-config = load_config()
-seed = config["random_seed"]
-```
-
-## Notebook workflow
-
-Notebooks should import reusable code from the installed `price_diffusion`
-package. They should not alter `sys.path`, duplicate source functions, or become
-the only record of a transformation. Once exploratory logic is stable, move it
-to `src/price_diffusion/`, add tests, and call it from the notebook.
-
-Run notebooks from the repository root so relative paths agree with the
-version-controlled configuration. Treat notebook outputs as disposable unless
-an artifact is intentionally written to `outputs/figures/`, `outputs/tables/`,
-or `outputs/diagnostics/`.
-
-## Descriptive event study
-
-Stage 8 freezes each event's dated peer membership and weights, builds a long
-event-time panel, and measures t+1 through t+h initiator CAR, peer CAR, peer
-catch-up, initiator reversal, and their total convergence. The selected return
-column and its specification label are explicit, and incomplete horizons remain
-in the output with a reason.
-
-```python
-from price_diffusion.event_study import run_event_study
-
-result = run_event_study(
-    events,
-    abnormal_returns,
-    peer_membership,
-    config,
-    return_column="semiconductor_adjusted_return",
-    return_specification="semiconductor_adjusted_return",
-)
-event_panel = result.event_panel
-event_outcomes = result.outcomes
-diagnostics = result.diagnostics
-```
-
-These outputs are descriptive only. Stage 8 does not perform significance
-tests or support causal claims about information diffusion.
-
-## Frozen empirical baseline
-
-Stage 12 assembles the missing peer, relative-return, event, and event-panel
-datasets from the Stage 11D artifacts, runs the frozen 2015--2025 study, and
-writes the baseline tables, figures, and run manifest under `outputs/baseline/`.
-The production peer groups copy the final manually reviewed Stage 11A
-subsectors; the older peer-classification CSV remains a Stage 5 smoke-test seed.
-
-```bash
+python -m price_diffusion.stage11d
 python -m price_diffusion.baseline
 ```
 
-The human research workflow is `notebooks/05_baseline_event_study.ipynb`, while
-all transformations and calculations remain in `src/price_diffusion/`.
+Use `configs/final_baseline.yaml`; `configs/baseline.yaml` is an earlier design scaffold. The human-readable notebook sequence is data audit (`00`, `01`), baseline (`05`), exploratory diagnosis (`06`–`09`), fixed mechanism tests (`10`–`13`), and robustness/final synthesis (`14`–`17`). The null notebook is intentionally expensive and does not need to be rerun just to inspect the stored results.
 
-## Statistical inference
+Run the lightweight test suite with:
 
-Stage 9 measures uncertainty around detected-event outcomes without changing
-event definitions or simulating selection-preserving nulls. It reports complete
-distributions for convergence, peer catch-up, and initiator reversal by horizon,
-return specification, peer definition, and shock direction. Analytical
-Student-t and reproducible percentile-bootstrap confidence intervals are
-available.
-
-Convergence uses a one-sided test against a positive mean; peer catch-up and
-initiator reversal use two-sided tests against zero. The default covariance
-estimator clusters by initiating firm. Event-date and analytical two-way
-clustering are also supported. These are conditional-on-selection associations,
-not causal evidence.
-
-Conditional peer-CAR and initiator-CAR regressions use a fixed, parsimonious
-design: signed initial shock, direction, event-date volume and market
-capitalization, subsector, two volatility regimes, and a simultaneous-event
-flag. Only named contemporaneous fields enter the model.
-
-```python
-from price_diffusion.statistical_inference import InferenceConfig, run_statistical_inference
-
-inference = run_statistical_inference(
-    result.outcomes,
-    event_panel=result.event_panel,
-    event_characteristics=event_characteristics,
-    config=InferenceConfig(cluster_by="firm"),
-    output_directory="outputs/tables",
-)
-```
-
-The call writes summary, distribution, hypothesis, attrition, regression, and
-event-time CSV tables under `outputs/tables/`.
-
-## Repository layout
-
-```text
-configs/                 Version-controlled experiment settings
-data/raw/                Immutable source data (not committed)
-data/interim/            Intermediate transformations (not committed)
-data/processed/          Analysis-ready datasets (not committed)
-metadata/                Data dictionaries and provenance records
-notebooks/               Exploration and research communication
-src/price_diffusion/     Reusable research code
-tests/                   Automated checks
-outputs/figures/         Generated figures
-outputs/tables/          Generated tables
-outputs/diagnostics/     Generated diagnostics
+```bash
+python -m pytest -q
 ```

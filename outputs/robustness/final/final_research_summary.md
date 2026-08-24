@@ -10,12 +10,14 @@ The frozen 2015–2025 Stage 12 sample contains 54 reviewed securities, 36 ever 
 
 ## Evidence table
 
-| hypothesis | evidence | conclusion |
-| --- | --- | --- |
-| Economic peers outperform correlation peers | Five-day paired advantage 0.61% (95% CI 0.16% to 1.05%; n=131); absolute catch-up is at selection-null percentile 83 (p=0.17). | Peer-definition advantage survives at short/medium horizons; absolute diffusion evidence weakens under the selection null. |
-| Equipment diffusion | Five-day peer catch-up 0.80%, initiator reversal -0.49%, convergence 0.31%. | Peer component survives; total convergence remains weak. |
-| Lower sector momentum strengthens convergence | Five-day one-month momentum coefficient -0.033 (95% CI -0.126 to 0.060). | Directional and horizon-sensitive, not robustly established. |
-| Shock nonlinearity | All 9 pre-specified squared-shock intervals include zero. | Not confirmed. |
+| hypothesis | estimate / evidence | uncertainty | status | interpretation |
+| --- | --- | --- | --- | --- |
+| Universal convergence | Five-day economic-peer catch-up +0.22%; convergence +0.38% (n=173). Ten-day convergence -0.15%. | Five-day selection-preserving empirical p≈0.17 for catch-up and p≈0.13 for convergence; dependence-aware intervals include zero. | not supported | Some events may adjust, but the sample does not establish a universal diffusion effect. |
+| Economic vs correlation peer catch-up | Five-day paired economic-minus-correlation advantage +0.61% (n=131); economic level +0.34% versus correlation level -0.27%. | Paired-bootstrap 95% CI +0.16% to +1.05%; positive at one and five days and imprecise at ten days. | supported | Economic relationships contain incremental short-horizon peer-adjustment information relative to the fixed trailing-correlation rule. |
+| Equipment peer catch-up | Five-day catch-up +0.80%; initiator reversal -0.49%; convergence +0.31% (n=47). | Catch-up 95% CI +0.28% to +1.33%; reversal -1.40% to +0.42%; convergence -0.60% to +1.22%. | partially supported | Equipment peers moved in the shock direction, but initiator continuation weakened total convergence. |
+| Lower prior sector momentum | Five-day convergence +0.92% after weak/nonpositive one-month momentum versus -0.02% after positive momentum; controlled coefficient -0.033. | Five-day coefficient 95% CI -0.126 to 0.060; support was stronger at one day and imprecise later. | suggestive | The direction is plausible but horizon-sensitive and not uniformly precise. |
+| Nonlinear shock magnitude | All 9 pre-specified squared-shock tests had confidence intervals spanning zero. | Five-day convergence squared term about +0.036 percentage points; 95% CI -0.062 to +0.134 percentage points. | not supported | The exploratory curvature did not survive the fixed formal test. |
+| Time-stable absolute catch-up | Five-day catch-up +0.01% in 2015–2018, -0.35% in 2019–2021, and +0.45% in 2022–2025. | Every period confidence interval includes zero; recent years contribute most of the positive estimate. | not supported | Absolute catch-up was not uniform across the sample period. |
 
 ## Specification evidence at five days
 

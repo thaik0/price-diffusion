@@ -773,6 +773,9 @@ def run_final_research_summary(
     regressions = pd.read_csv(
         PROJECT_ROOT / "outputs" / "mechanism_analysis" / "regressions" / "mechanism_regression_results.csv"
     )
+    baseline = pd.read_csv(
+        PROJECT_ROOT / "outputs" / "baseline" / "tables" / "mechanism_decomposition.csv"
+    )
 
     peer5 = peer.loc[
         peer["comparison_type"].eq("paired_economic_minus_correlation")
@@ -797,27 +800,74 @@ def run_final_research_summary(
         null_results["horizon"].eq(5)
         & null_results["outcome"].eq("peer_catchup")
     ].iloc[0]
+    null_convergence5 = null_results.loc[
+        null_results["horizon"].eq(5)
+        & null_results["outcome"].eq("convergence")
+    ].iloc[0]
+    baseline5 = baseline.loc[baseline["horizon"].eq(5)].iloc[0]
+    baseline10 = baseline.loc[baseline["horizon"].eq(10)].iloc[0]
+    peer_levels5 = peer.loc[
+        peer["comparison_type"].eq("peer_definition_level")
+        & peer["horizon"].eq(5)
+        & peer["outcome"].eq("peer_catchup")
+    ].set_index("peer_definition")
+    momentum_split5 = regime.loc[
+        regime["analysis_type"].eq("sign_based_regime_comparison")
+        & regime["horizon"].eq(5)
+        & regime["momentum_window"].eq("SectorMomentum_1m")
+    ].set_index("regime")
+    nonlinear5 = nonlinear.loc[
+        nonlinear["horizon"].eq(5) & nonlinear["dependent_variable"].eq("convergence")
+    ].iloc[0]
+    time5 = stability.loc[
+        stability["analysis"].eq("time_period")
+        & stability["horizon"].eq(5)
+        & stability["outcome"].eq("peer_catchup")
+    ]
+    time_means = time5.set_index("group")["mean"]
     evidence = pd.DataFrame(
         [
             {
-                "hypothesis": "Economic peers outperform correlation peers",
-                "evidence": f"Five-day paired advantage {peer5['mean']:.2%} (95% CI {peer5['ci_lower']:.2%} to {peer5['ci_upper']:.2%}; n={int(peer5['sample_size'])}); absolute catch-up is at selection-null percentile {null_peer5['percentile_location']:.0f} (p={null_peer5['empirical_p_value']:.2f}).",
-                "conclusion": "Peer-definition advantage survives at short/medium horizons; absolute diffusion evidence weakens under the selection null.",
+                "hypothesis": "Universal convergence",
+                "estimate / evidence": f"Five-day economic-peer catch-up {baseline5['peer_catchup_mean']:+.2%}; convergence {baseline5['convergence_mean']:+.2%} (n={int(baseline5['valid_events'])}). Ten-day convergence {baseline10['convergence_mean']:+.2%}.",
+                "uncertainty": f"Five-day selection-preserving empirical p≈{null_peer5['empirical_p_value']:.2f} for catch-up and p≈{null_convergence5['empirical_p_value']:.2f} for convergence; dependence-aware intervals include zero.",
+                "status": "not supported",
+                "interpretation": "Some events may adjust, but the sample does not establish a universal diffusion effect.",
             },
             {
-                "hypothesis": "Equipment diffusion",
-                "evidence": f"Five-day peer catch-up {equip5.loc['peer_catchup','mean']:.2%}, initiator reversal {equip5.loc['initiator_reversal','mean']:.2%}, convergence {equip5.loc['convergence','mean']:.2%}.",
-                "conclusion": "Peer component survives; total convergence remains weak.",
+                "hypothesis": "Economic vs correlation peer catch-up",
+                "estimate / evidence": f"Five-day paired economic-minus-correlation advantage {peer5['mean']:+.2%} (n={int(peer5['sample_size'])}); economic level {peer_levels5.loc['economic_subsector_peers','mean']:+.2%} versus correlation level {peer_levels5.loc['trailing_return_similarity_peers','mean']:+.2%}.",
+                "uncertainty": f"Paired-bootstrap 95% CI {peer5['ci_lower']:+.2%} to {peer5['ci_upper']:+.2%}; positive at one and five days and imprecise at ten days.",
+                "status": "supported",
+                "interpretation": "Economic relationships contain incremental short-horizon peer-adjustment information relative to the fixed trailing-correlation rule.",
             },
             {
-                "hypothesis": "Lower sector momentum strengthens convergence",
-                "evidence": f"Five-day one-month momentum coefficient {momentum5['coefficient']:.3f} (95% CI {momentum5['ci_lower']:.3f} to {momentum5['ci_upper']:.3f}).",
-                "conclusion": "Directional and horizon-sensitive, not robustly established.",
+                "hypothesis": "Equipment peer catch-up",
+                "estimate / evidence": f"Five-day catch-up {equip5.loc['peer_catchup','mean']:+.2%}; initiator reversal {equip5.loc['initiator_reversal','mean']:+.2%}; convergence {equip5.loc['convergence','mean']:+.2%} (n={int(equip5.loc['convergence','event_count'])}).",
+                "uncertainty": f"Catch-up 95% CI {equip5.loc['peer_catchup','ci_lower']:+.2%} to {equip5.loc['peer_catchup','ci_upper']:+.2%}; reversal {equip5.loc['initiator_reversal','ci_lower']:+.2%} to {equip5.loc['initiator_reversal','ci_upper']:+.2%}; convergence {equip5.loc['convergence','ci_lower']:+.2%} to {equip5.loc['convergence','ci_upper']:+.2%}.",
+                "status": "partially supported",
+                "interpretation": "Equipment peers moved in the shock direction, but initiator continuation weakened total convergence.",
             },
             {
-                "hypothesis": "Shock nonlinearity",
-                "evidence": f"All {len(nonlinear)} pre-specified squared-shock intervals include zero.",
-                "conclusion": "Not confirmed.",
+                "hypothesis": "Lower prior sector momentum",
+                "estimate / evidence": f"Five-day convergence {momentum_split5.loc['weak_nonpositive','mean']:+.2%} after weak/nonpositive one-month momentum versus {momentum_split5.loc['strong_positive','mean']:+.2%} after positive momentum; controlled coefficient {momentum5['coefficient']:.3f}.",
+                "uncertainty": f"Five-day coefficient 95% CI {momentum5['ci_lower']:.3f} to {momentum5['ci_upper']:.3f}; support was stronger at one day and imprecise later.",
+                "status": "suggestive",
+                "interpretation": "The direction is plausible but horizon-sensitive and not uniformly precise.",
+            },
+            {
+                "hypothesis": "Nonlinear shock magnitude",
+                "estimate / evidence": f"All {len(nonlinear)} pre-specified squared-shock tests had confidence intervals spanning zero.",
+                "uncertainty": f"Five-day convergence squared term about {100 * nonlinear5['coefficient']:+.3f} percentage points; 95% CI {100 * nonlinear5['ci_lower']:+.3f} to {100 * nonlinear5['ci_upper']:+.3f} percentage points.",
+                "status": "not supported",
+                "interpretation": "The exploratory curvature did not survive the fixed formal test.",
+            },
+            {
+                "hypothesis": "Time-stable absolute catch-up",
+                "estimate / evidence": f"Five-day catch-up {time_means['early_2015_2018']:+.2%} in 2015–2018, {time_means['middle_2019_2021']:+.2%} in 2019–2021, and {time_means['recent_2022_2025']:+.2%} in 2022–2025.",
+                "uncertainty": "Every period confidence interval includes zero; recent years contribute most of the positive estimate.",
+                "status": "not supported",
+                "interpretation": "Absolute catch-up was not uniform across the sample period.",
             },
         ]
     )
@@ -827,11 +877,6 @@ def run_final_research_summary(
         & specification["outcome"].eq("peer_catchup")
         & specification["variation_type"].isin(["event_threshold", "universe", "peer_advantage_horizon"])
     ][["variation_type", "specification", "event_count", "mean", "ci_lower", "ci_upper", "status"]]
-    time5 = stability.loc[
-        stability["analysis"].eq("time_period")
-        & stability["horizon"].eq(5)
-        & stability["outcome"].eq("peer_catchup")
-    ]
     directory = Path(output_directory)
     directory.mkdir(parents=True, exist_ok=True)
     evidence.to_csv(directory / "evidence_table.csv", index=False)
@@ -898,7 +943,7 @@ All requested variants were fixed before this run, weak and unavailable results 
                 STABILITY_DIR / "stability_results.csv",
             ]
         ),
-        "all_hypotheses_reported": len(evidence) == 4,
+        "all_hypotheses_reported": len(evidence) == 6,
         "limitations_explicit": all(
             phrase in report
             for phrase in [
