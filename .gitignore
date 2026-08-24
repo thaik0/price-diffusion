@@ -6,10 +6,9 @@ __pycache__/
 build/
 dist/
 .ipynb_checkpoints/
-# Stage notes are local working material; keep the two final reader-facing notes.
+# Stage notes are local working material; keep only the final research summary.
 research_notes/*
 !research_notes/final_research_summary.md
-!research_notes/interview_guide.md
 
 # Keep directory markers, but do not version generated or downloaded data.
 data/raw/*
